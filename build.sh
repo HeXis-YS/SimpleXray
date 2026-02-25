@@ -36,7 +36,7 @@ install -v lwipopts.h app/src/main/jni/hev-socks5-tunnel/third-part/lwip/src/por
 install -v -m 0755 ndk-wrapper.py $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ndk-wrapper.py
 for f in $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android*; do
   # Skip backup files themselves
-  [ "$f" == *_ ] && continue
+  [[ "$f" == *_ ]] && continue
 
   bak="${f}_"
   # If backup exists, do nothing
