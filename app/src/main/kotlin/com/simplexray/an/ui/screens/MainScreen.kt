@@ -20,7 +20,6 @@ import com.simplexray.an.common.NAVIGATION_DEBOUNCE_DELAY
 import com.simplexray.an.common.ROUTE_CONFIG
 import com.simplexray.an.common.ROUTE_LOG
 import com.simplexray.an.common.ROUTE_SETTINGS
-import com.simplexray.an.common.ROUTE_STATS
 import com.simplexray.an.common.rememberMainScreenCallbacks
 import com.simplexray.an.common.rememberMainScreenLaunchers
 import com.simplexray.an.ui.navigation.BottomNavHost
@@ -112,7 +111,7 @@ fun MainScreen(
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val mainScreenRoutes = listOf(ROUTE_STATS, ROUTE_CONFIG, ROUTE_LOG, ROUTE_SETTINGS)
+    val mainScreenRoutes = listOf(ROUTE_CONFIG, ROUTE_LOG, ROUTE_SETTINGS)
 
     if (currentRoute in mainScreenRoutes) {
         AppScaffold(
