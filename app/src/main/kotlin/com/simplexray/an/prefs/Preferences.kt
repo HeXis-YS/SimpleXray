@@ -97,7 +97,7 @@ class Preferences(context: Context) {
     }
 
     val socksAddress: String
-        get() = getPrefData(SOCKS_ADDR).first ?: "127.0.0.1"
+        get() = getPrefData(SOCKS_ADDR).first ?: "::1"
 
     var socksPort: Int
         get() {
@@ -106,7 +106,7 @@ class Preferences(context: Context) {
             if (value != null && port == null) {
                 Log.e(TAG, "Failed to parse SocksPort as Integer: $value")
             }
-            return port ?: 10808
+            return port ?: 10809
         }
         set(port) {
             setValueInProvider(SOCKS_PORT, port.toString())
@@ -119,19 +119,16 @@ class Preferences(context: Context) {
         get() = getPrefData(SOCKS_PASS).first ?: ""
 
     var dnsIpv4: String
-        get() = getPrefData(DNS_IPV4).first ?: "8.8.8.8"
+        get() = getPrefData(DNS_IPV4).first ?: "1.1.1.1"
         set(addr) {
             setValueInProvider(DNS_IPV4, addr)
         }
 
     var dnsIpv6: String
-        get() = getPrefData(DNS_IPV6).first ?: "2001:4860:4860::8888"
+        get() = getPrefData(DNS_IPV6).first ?: "2606:4700:4700::1111"
         set(addr) {
             setValueInProvider(DNS_IPV6, addr)
         }
-
-    val udpInTcp: Boolean
-        get() = getBooleanPref(UDP_IN_TCP, false)
 
     var ipv4: Boolean
         get() = getBooleanPref(IPV4, true)
@@ -182,10 +179,10 @@ class Preferences(context: Context) {
         }
 
     val tunnelMtu: Int
-        get() = 8500
+        get() = 65535
 
     val tunnelIpv4Address: String
-        get() = "198.18.0.1"
+        get() = "192.0.0.8"
 
     val tunnelIpv4Prefix: Int
         get() = 32
@@ -196,8 +193,14 @@ class Preferences(context: Context) {
     val tunnelIpv6Prefix: Int
         get() = 128
 
-    val taskStackSize: Int
-        get() = 81920
+    val logLevel: String
+        get() = "error"
+
+    val multiQueue: Boolean
+        get() = true
+
+    val pipeline: Boolean
+        get() = true
 
     var selectedConfigPath: String?
         get() = getPrefData(SELECTED_CONFIG_PATH).first
@@ -310,7 +313,6 @@ class Preferences(context: Context) {
         const val IPV4: String = "Ipv4"
         const val IPV6: String = "Ipv6"
         const val GLOBAL: String = "Global"
-        const val UDP_IN_TCP: String = "UdpInTcp"
         const val APPS: String = "Apps"
         const val ENABLE: String = "Enable"
         const val SELECTED_CONFIG_PATH: String = "SelectedConfigPath"

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 export GRADLE_OPTS=-Dorg.gradle.daemon=false
-export JAVA_HOME=$JAVA_HOME_21_X64
+export JAVA_HOME=$JAVA_HOME_17_X64
 
 export CGO_ENABLED=0
 export GOOS=android

@@ -301,11 +301,127 @@ class TProxyService : VpnService() {
             addRoute("192.168.0.0", 16)
         }
         if (prefs.httpProxyEnabled) {
-            setHttpProxy(ProxyInfo.buildDirectProxy("127.0.0.1", prefs.socksPort))
+            setHttpProxy(ProxyInfo.buildDirectProxy("::1", prefs.socksPort))
         }
         if (prefs.ipv4) {
             addAddress(prefs.tunnelIpv4Address, prefs.tunnelIpv4Prefix)
-            addRoute("0.0.0.0", 0)
+            if (prefs.bypassLan) {
+                addRoute("1.0.0.0", 8)
+                addRoute("2.0.0.0", 7)
+                addRoute("4.0.0.0", 6)
+                addRoute("8.0.0.0", 7)
+                addRoute("11.0.0.0", 8)
+                addRoute("12.0.0.0", 6)
+                addRoute("16.0.0.0", 4)
+                addRoute("32.0.0.0", 3)
+                addRoute("64.0.0.0", 3)
+                addRoute("96.0.0.0", 6)
+                addRoute("100.0.0.0", 10)
+                addRoute("100.128.0.0", 9)
+                addRoute("101.0.0.0", 8)
+                addRoute("102.0.0.0", 7)
+                addRoute("104.0.0.0", 5)
+                addRoute("112.0.0.0", 5)
+                addRoute("120.0.0.0", 6)
+                addRoute("124.0.0.0", 7)
+                addRoute("126.0.0.0", 8)
+                addRoute("128.0.0.0", 3)
+                addRoute("160.0.0.0", 5)
+                addRoute("168.0.0.0", 8)
+                addRoute("169.0.0.0", 9)
+                addRoute("169.128.0.0", 10)
+                addRoute("169.192.0.0", 11)
+                addRoute("169.224.0.0", 12)
+                addRoute("169.240.0.0", 13)
+                addRoute("169.248.0.0", 14)
+                addRoute("169.252.0.0", 15)
+                addRoute("169.255.0.0", 16)
+                addRoute("170.0.0.0", 7)
+                addRoute("172.0.0.0", 12)
+                addRoute("172.32.0.0", 11)
+                addRoute("172.64.0.0", 10)
+                addRoute("172.128.0.0", 9)
+                addRoute("173.0.0.0", 8)
+                addRoute("174.0.0.0", 7)
+                addRoute("176.0.0.0", 4)
+                addRoute("192.0.1.0", 24)
+                addRoute("192.0.3.0", 24)
+                addRoute("192.0.4.0", 22)
+                addRoute("192.0.8.0", 21)
+                addRoute("192.0.16.0", 20)
+                addRoute("192.0.32.0", 19)
+                addRoute("192.0.64.0", 18)
+                addRoute("192.0.128.0", 17)
+                addRoute("192.1.0.0", 16)
+                addRoute("192.2.0.0", 15)
+                addRoute("192.4.0.0", 14)
+                addRoute("192.8.0.0", 13)
+                addRoute("192.16.0.0", 12)
+                addRoute("192.32.0.0", 11)
+                addRoute("192.64.0.0", 12)
+                addRoute("192.80.0.0", 13)
+                addRoute("192.88.0.0", 18)
+                addRoute("192.88.64.0", 19)
+                addRoute("192.88.96.0", 23)
+                addRoute("192.88.98.0", 24)
+                addRoute("192.88.100.0", 22)
+                addRoute("192.88.104.0", 21)
+                addRoute("192.88.112.0", 20)
+                addRoute("192.88.128.0", 17)
+                addRoute("192.89.0.0", 16)
+                addRoute("192.90.0.0", 15)
+                addRoute("192.92.0.0", 14)
+                addRoute("192.96.0.0", 11)
+                addRoute("192.128.0.0", 11)
+                addRoute("192.160.0.0", 13)
+                addRoute("192.169.0.0", 16)
+                addRoute("192.170.0.0", 15)
+                addRoute("192.172.0.0", 14)
+                addRoute("192.176.0.0", 12)
+                addRoute("192.192.0.0", 10)
+                addRoute("193.0.0.0", 8)
+                addRoute("194.0.0.0", 7)
+                addRoute("196.0.0.0", 7)
+                addRoute("198.0.0.0", 11)
+                addRoute("198.32.0.0", 12)
+                addRoute("198.48.0.0", 15)
+                addRoute("198.50.0.0", 16)
+                addRoute("198.51.0.0", 18)
+                addRoute("198.51.64.0", 19)
+                addRoute("198.51.96.0", 22)
+                addRoute("198.51.101.0", 24)
+                addRoute("198.51.102.0", 23)
+                addRoute("198.51.104.0", 21)
+                addRoute("198.51.112.0", 20)
+                addRoute("198.51.128.0", 17)
+                addRoute("198.52.0.0", 14)
+                addRoute("198.56.0.0", 13)
+                addRoute("198.64.0.0", 10)
+                addRoute("198.128.0.0", 9)
+                addRoute("199.0.0.0", 8)
+                addRoute("200.0.0.0", 7)
+                addRoute("202.0.0.0", 8)
+                addRoute("203.0.0.0", 18)
+                addRoute("203.0.64.0", 19)
+                addRoute("203.0.96.0", 20)
+                addRoute("203.0.112.0", 24)
+                addRoute("203.0.114.0", 23)
+                addRoute("203.0.116.0", 22)
+                addRoute("203.0.120.0", 21)
+                addRoute("203.0.128.0", 17)
+                addRoute("203.1.0.0", 16)
+                addRoute("203.2.0.0", 15)
+                addRoute("203.4.0.0", 14)
+                addRoute("203.8.0.0", 13)
+                addRoute("203.16.0.0", 12)
+                addRoute("203.32.0.0", 11)
+                addRoute("203.64.0.0", 10)
+                addRoute("203.128.0.0", 9)
+                addRoute("204.0.0.0", 6)
+                addRoute("208.0.0.0", 4)
+            } else {
+                addRoute("0.0.0.0", 0)
+            }
             prefs.dnsIpv4.takeIf { it.isNotEmpty() }?.also { addDnsServer(it) }
         }
         if (prefs.ipv6) {
@@ -424,14 +540,15 @@ class TProxyService : VpnService() {
 
         private fun getTproxyConf(prefs: Preferences): String {
             var tproxyConf = """misc:
-  task-stack-size: ${prefs.taskStackSize}
+  log-level: ${prefs.logLevel}
 tunnel:
   mtu: ${prefs.tunnelMtu}
+  multi-queue: '${if (prefs.multiQueue) "true" else "false"}'
 """
             tproxyConf += """socks5:
   port: ${prefs.socksPort}
   address: '${prefs.socksAddress}'
-  udp: '${if (prefs.udpInTcp) "tcp" else "udp"}'
+  pipeline: '${if (prefs.pipeline) "true" else "false"}'
 """
             if (prefs.socksUsername.isNotEmpty() && prefs.socksPassword.isNotEmpty()) {
                 tproxyConf += "  username: '" + prefs.socksUsername + "'\n"

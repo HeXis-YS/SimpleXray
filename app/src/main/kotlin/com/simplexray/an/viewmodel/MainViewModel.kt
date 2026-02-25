@@ -303,7 +303,7 @@ class MainViewModel(application: Application) :
     suspend fun updateCoreStats() {
         if (!_isServiceEnabled.value) return
         if (coreStatsClient == null)
-            coreStatsClient = CoreStatsClient.create("127.0.0.1", prefs.apiPort)
+            coreStatsClient = CoreStatsClient.create("::1", prefs.apiPort)
 
         val stats = coreStatsClient?.getSystemStats()
         val traffic = coreStatsClient?.getTraffic()
@@ -870,7 +870,7 @@ class MainViewModel(application: Application) :
 
             val client = OkHttpClient.Builder().apply {
                 if (_isServiceEnabled.value) {
-                    proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", prefs.socksPort)))
+                    proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress("::1", prefs.socksPort)))
                 }
             }.build()
 
@@ -990,7 +990,7 @@ class MainViewModel(application: Application) :
             _isCheckingForUpdates.value = true
             val client = OkHttpClient.Builder().apply {
                 if (_isServiceEnabled.value) {
-                    proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", prefs.socksPort)))
+                    proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress("::1", prefs.socksPort)))
                 }
             }.build()
 
