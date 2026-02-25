@@ -101,13 +101,6 @@
     <string name="delete_rule_file_title">删除规则文件</string>
     <string name="delete_rule_file_message">这将恢复为默认规则文件，确定吗？</string>
     <string name="restore_default_url">恢复默认地址</string>
-    <string name="core_stats_title">仪表</string>
-    <string name="stats_uplink">上行流量</string>
-    <string name="stats_downlink">下行流量</string>
-    <string name="stats_num_goroutine">Goroutine数量</string>
-    <string name="stats_num_gc">垃圾回收次数</string>
-    <string name="stats_alloc">已分配内存</string>
-    <string name="stats_uptime">运行时间</string>
     <string name="check_for_updates">检查更新</string>
     <string name="no_new_version_available">没有新版本可用</string>
     <string name="failed_to_check_for_updates">检查更新失败</string>

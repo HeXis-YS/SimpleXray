@@ -20,8 +20,6 @@ import androidx.core.app.NotificationCompat
 import com.simplexray.an.BuildConfig
 import com.simplexray.an.R
 import com.simplexray.an.activity.MainActivity
-import com.simplexray.an.common.ConfigUtils
-import com.simplexray.an.common.ConfigUtils.extractPortsFromJson
 import com.simplexray.an.data.source.LogFileManager
 import com.simplexray.an.prefs.Preferences
 import kotlinx.coroutines.CoroutineScope
@@ -31,11 +29,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.InterruptedIOException
-import java.net.ServerSocket
 import kotlin.concurrent.Volatile
 import kotlin.system.exitProcess
 
@@ -56,25 +54,6 @@ class TProxyService : VpnService() {
                 Log.d(TAG, "Broadcasted a batch of logs.")
             }
         }
-    }
-
-    private fun findAvailablePort(excludedPorts: Set<Int>): Int? {
-        (10000..65535)
-            .shuffled()
-            .forEach { port ->
-                if (port in excludedPorts) return@forEach
-                runCatching {
-                    ServerSocket(port).use { socket ->
-                        socket.reuseAddress = true
-                    }
-                    port
-                }.onFailure {
-                    Log.d(TAG, "Port $port unavailable: ${it.message}")
-                }.onSuccess {
-                    return port
-                }
-            }
-        return null
     }
 
     private lateinit var logFileManager: LogFileManager
@@ -176,22 +155,23 @@ class TProxyService : VpnService() {
             Log.d(TAG, "Attempting to start xray process.")
             val libraryDir = getNativeLibraryDir(applicationContext)
             val prefs = Preferences(applicationContext)
-            val selectedConfigPath = prefs.selectedConfigPath ?: return
+            val selectedConfigPath = prefs.selectedConfigPath
+            if (selectedConfigPath == null || !File(selectedConfigPath).exists()) return
             val xrayPath = "$libraryDir/libxray.so"
-            val configContent = File(selectedConfigPath).readText()
-            val apiPort = findAvailablePort(extractPortsFromJson(configContent)) ?: return
-            prefs.apiPort = apiPort
-            Log.d(TAG, "Found and set API port: $apiPort")
 
             val processBuilder = getProcessBuilder(xrayPath)
             currentProcess = processBuilder.start()
             this.xrayProcess = currentProcess
 
             Log.d(TAG, "Writing config to xray stdin from: $selectedConfigPath")
-            val injectedConfigContent =
-                ConfigUtils.injectStatsService(prefs, configContent)
             currentProcess.outputStream.use { os ->
-                os.write(injectedConfigContent.toByteArray())
+                FileInputStream(selectedConfigPath).use { fis ->
+                    val buffer = ByteArray(4096)
+                    var bytesRead: Int
+                    while (fis.read(buffer).also { bytesRead = it } != -1) {
+                        os.write(buffer, 0, bytesRead)
+                    }
+                }
                 os.flush()
             }
 
