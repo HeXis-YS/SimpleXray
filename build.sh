@@ -34,19 +34,21 @@ install -v lwipopts.h app/src/main/jni/hev-socks5-tunnel/third-part/lwip/src/por
 
 # Install NDK wrapper to latest NDK toolchain
 install -v -m 0755 ndk-wrapper.py $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ndk-wrapper.py
-for f in $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android*; do
-  # Skip backup files themselves
-  [[ "$f" == *_ ]] && continue
-
-  bak="${f}_"
-  # If backup exists, do nothing
-  [ -e "$bak" ] && continue
-
-  # Backup original
-  mv "$f" "$bak"
-  # Create symlink with original name pointing to wrapper (relative link is cleaner)
-  ln -sf "ndk-wrapper.py" "$f"
-done
+pushd $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
+if [ ! -e clang_ ]; then
+    mv clang clang_
+    ln -sf ndk-wrapper.py clang
+fi
+if [ ! -e clang++_ ]; then
+    if [ -L clang++ ]; then
+        rm -f clang++
+        ln -sf clang_ clang++_
+    else
+        mv clang++ clang++_
+    fi
+    ln -sf ndk-wrapper.py clang++
+fi
+popd
 
 # Link selected NDK to latest
 source version.properties

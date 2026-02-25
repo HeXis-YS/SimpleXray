@@ -7,14 +7,28 @@ class CompilerWrapper:
     def __init__(self, argv):
         self.argv0 = argv[0]
         self.args = argv[1:]
-        wrapper_name = Path(argv[0]).name.rsplit(sep='-', maxsplit=1)
-        self.target = wrapper_name[0]
-        self.real_compiler = Path(__file__).resolve().parent / wrapper_name[1]
+        self.real_compiler = Path(__file__).resolve().parent / (self.argv0 + "_")
+
+    def check_target(self):
+        i = len(self.args) - 1
+        while i >= 0:
+            arg = self.args[i]
+            if arg.startswith("-target="):
+                value = arg.split("=", 1)[1]
+                return value.startswith("aarch64")
+            elif arg == "-target":
+                if i + 1 < len(self.args):
+                    return self.args[i + 1].startswith("aarch64")
+                return False
+            i -= 1
+        return False
 
     def parse_custom_flags(self):
         if len(self.args) == 0 or "-cc1" in self.args or "-cc1as" in self.args:
             return
-        prepend_flags = [f"--target={self.target}"]
+        if not self.check_target():
+            return
+        prepend_flags = []
         append_flags = ["-Wno-unused-command-line-argument"]
         if not os.getenv("NDK_WRAPPER_DISABLED"):
             self.args = [a for a in self.args if not a.startswith("-march=")]
