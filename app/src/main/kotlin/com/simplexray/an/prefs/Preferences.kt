@@ -284,16 +284,6 @@ class Preferences(context: Context) {
             setValueInProvider(GEOSITE_URL, value)
         }
 
-    var apiPort: Int
-        get() {
-            val value = getPrefData(API_PORT).first
-            val port = value?.toIntOrNull()
-            return port ?: 0
-        }
-        set(port) {
-            setValueInProvider(API_PORT, port.toString())
-        }
-
     var bypassSelectedApps: Boolean
         get() = getBooleanPref(BYPASS_SELECTED_APPS, false)
         set(enable) {
@@ -331,7 +321,6 @@ class Preferences(context: Context) {
         const val CONNECTIVITY_TEST_TIMEOUT: String = "ConnectivityTestTimeout"
         const val GEOIP_URL: String = "GeoipUrl"
         const val GEOSITE_URL: String = "GeositeUrl"
-        const val API_PORT: String = "ApiPort"
         const val BYPASS_SELECTED_APPS: String = "BypassSelectedApps"
         const val THEME: String = "Theme"
         private const val TAG = "Preferences"

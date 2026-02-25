@@ -19,7 +19,6 @@ import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.simplexray.an.BuildConfig
 import com.simplexray.an.R
-import com.simplexray.an.common.CoreStatsClient
 import com.simplexray.an.common.ROUTE_APP_LIST
 import com.simplexray.an.common.ROUTE_CONFIG_EDIT
 import com.simplexray.an.common.ThemeMode
@@ -72,8 +71,6 @@ class MainViewModel(application: Application) :
     private val activityScope: CoroutineScope = viewModelScope
     private var compressedBackupData: ByteArray? = null
 
-    private var coreStatsClient: CoreStatsClient? = null
-
     private val fileManager: FileManager = FileManager(application, prefs)
 
     var reloadView: (() -> Unit)? = null
@@ -111,9 +108,6 @@ class MainViewModel(application: Application) :
         )
     )
     val settingsState: StateFlow<SettingsState> = _settingsState.asStateFlow()
-
-    private val _coreStatsState = MutableStateFlow(CoreStatsState())
-    val coreStatsState: StateFlow<CoreStatsState> = _coreStatsState.asStateFlow()
 
     private val _controlMenuClickable = MutableStateFlow(true)
     val controlMenuClickable: StateFlow<Boolean> = _controlMenuClickable.asStateFlow()
@@ -157,9 +151,6 @@ class MainViewModel(application: Application) :
             Log.d(TAG, "Service stopped")
             setServiceEnabled(false)
             setControlMenuClickable(true)
-            _coreStatsState.value = CoreStatsState()
-            coreStatsClient?.close()
-            coreStatsClient = null
         }
     }
 
@@ -298,37 +289,6 @@ class MainViewModel(application: Application) :
             refreshConfigFileList()
         }
         return filePath
-    }
-
-    suspend fun updateCoreStats() {
-        if (!_isServiceEnabled.value) return
-        if (coreStatsClient == null)
-            coreStatsClient = CoreStatsClient.create("::1", prefs.apiPort)
-
-        val stats = coreStatsClient?.getSystemStats()
-        val traffic = coreStatsClient?.getTraffic()
-
-        if (stats == null && traffic == null) {
-            coreStatsClient?.close()
-            coreStatsClient = null
-            return
-        }
-
-        _coreStatsState.value = CoreStatsState(
-            uplink = traffic?.uplink ?: 0,
-            downlink = traffic?.downlink ?: 0,
-            numGoroutine = stats?.numGoroutine ?: 0,
-            numGC = stats?.numGC ?: 0,
-            alloc = stats?.alloc ?: 0,
-            totalAlloc = stats?.totalAlloc ?: 0,
-            sys = stats?.sys ?: 0,
-            mallocs = stats?.mallocs ?: 0,
-            frees = stats?.frees ?: 0,
-            liveObjects = stats?.liveObjects ?: 0,
-            pauseTotalNs = stats?.pauseTotalNs ?: 0,
-            uptime = stats?.uptime ?: 0
-        )
-        Log.d(TAG, "Core stats updated")
     }
 
     suspend fun importConfigFromClipboard(): String? {
