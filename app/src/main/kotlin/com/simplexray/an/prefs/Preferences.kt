@@ -130,6 +130,9 @@ class Preferences(context: Context) {
             setValueInProvider(DNS_IPV6, addr)
         }
 
+    val udpInTcp: Boolean
+        get() = getBooleanPref(UDP_IN_TCP, false)
+
     var ipv4: Boolean
         get() = getBooleanPref(IPV4, true)
         set(enable) {
@@ -313,6 +316,7 @@ class Preferences(context: Context) {
         const val IPV4: String = "Ipv4"
         const val IPV6: String = "Ipv6"
         const val GLOBAL: String = "Global"
+        const val UDP_IN_TCP: String = "UdpInTcp"
         const val APPS: String = "Apps"
         const val ENABLE: String = "Enable"
         const val SELECTED_CONFIG_PATH: String = "SelectedConfigPath"

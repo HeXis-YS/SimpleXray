@@ -543,12 +543,13 @@ class TProxyService : VpnService() {
   log-level: ${prefs.logLevel}
 tunnel:
   mtu: ${prefs.tunnelMtu}
-  multi-queue: '${if (prefs.multiQueue) "true" else "false"}'
+  multi-queue: ${if (prefs.multiQueue) "true" else "false"}
 """
             tproxyConf += """socks5:
   port: ${prefs.socksPort}
   address: '${prefs.socksAddress}'
-  pipeline: '${if (prefs.pipeline) "true" else "false"}'
+  udp: '${if (prefs.udpInTcp) "tcp" else "udp"}'
+  pipeline: ${if (prefs.pipeline) "true" else "false"}
 """
             if (prefs.socksUsername.isNotEmpty() && prefs.socksPassword.isNotEmpty()) {
                 tproxyConf += "  username: '" + prefs.socksUsername + "'\n"
