@@ -81,16 +81,7 @@ class FileManager(private val application: Application, private val prefs: Prefe
             val newFile = File(application.filesDir, filename)
             try {
                 val fileContent: String
-                if (prefs.useTemplate) {
-                    assets.open("template").use { assetInputStream ->
-                        val size = assetInputStream.available()
-                        val buffer = ByteArray(size)
-                        assetInputStream.read(buffer)
-                        fileContent = String(buffer, StandardCharsets.UTF_8)
-                    }
-                } else {
-                    fileContent = "{}"
-                }
+                fileContent = "{}"
                 FileOutputStream(newFile).use { fileOutputStream ->
                     fileOutputStream.write(fileContent.toByteArray())
                 }
@@ -179,7 +170,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
                     prefs.apps ?: emptySet()
                 )
                 preferencesMap[Preferences.BYPASS_LAN] = prefs.bypassLan
-                preferencesMap[Preferences.USE_TEMPLATE] = prefs.useTemplate
                 preferencesMap[Preferences.HTTP_PROXY_ENABLED] = prefs.httpProxyEnabled
                 preferencesMap[Preferences.CONFIG_FILES_ORDER] = prefs.configFilesOrder
                 preferencesMap[Preferences.DISABLE_VPN] = prefs.disableVpn
@@ -327,11 +317,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
                     value = preferencesMap[Preferences.BYPASS_LAN]
                     if (value is Boolean) {
                         prefs.bypassLan = (value as Boolean?)!!
-                    }
-
-                    value = preferencesMap[Preferences.USE_TEMPLATE]
-                    if (value is Boolean) {
-                        prefs.useTemplate = (value as Boolean?)!!
                     }
 
                     value = preferencesMap[Preferences.HTTP_PROXY_ENABLED]

@@ -85,7 +85,6 @@ class MainViewModel(application: Application) :
             dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
-                useTemplateEnabled = prefs.useTemplate,
                 httpProxyEnabled = prefs.httpProxyEnabled,
                 bypassLanEnabled = prefs.bypassLan,
                 disableVpn = prefs.disableVpn,
@@ -166,7 +165,6 @@ class MainViewModel(application: Application) :
             dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
-                useTemplateEnabled = prefs.useTemplate,
                 httpProxyEnabled = prefs.httpProxyEnabled,
                 bypassLanEnabled = prefs.bypassLan,
                 disableVpn = prefs.disableVpn,
@@ -407,13 +405,6 @@ class MainViewModel(application: Application) :
         prefs.ipv6 = enabled
         _settingsState.value = _settingsState.value.copy(
             switches = _settingsState.value.switches.copy(ipv6Enabled = enabled)
-        )
-    }
-
-    fun setUseTemplateEnabled(enabled: Boolean) {
-        prefs.useTemplate = enabled
-        _settingsState.value = _settingsState.value.copy(
-            switches = _settingsState.value.switches.copy(useTemplateEnabled = enabled)
         )
     }
 

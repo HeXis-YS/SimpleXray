@@ -223,19 +223,6 @@ fun SettingsScreen(
         PreferenceCategoryTitle(stringResource(R.string.general))
 
         ListItem(
-            headlineContent = { Text(stringResource(R.string.use_template_title)) },
-            supportingContent = { Text(stringResource(R.string.use_template_summary)) },
-            trailingContent = {
-                Switch(
-                    checked = settingsState.switches.useTemplateEnabled,
-                    onCheckedChange = {
-                        mainViewModel.setUseTemplateEnabled(it)
-                    }
-                )
-            }
-        )
-
-        ListItem(
             headlineContent = { Text(stringResource(R.string.theme_title)) },
             supportingContent = {
                 Text(stringResource(id = R.string.theme_summary))
