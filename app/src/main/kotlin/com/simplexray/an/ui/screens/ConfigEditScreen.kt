@@ -123,20 +123,6 @@ fun ConfigEditScreen(
                     contentDescription = stringResource(id = R.string.save)
                 )
             }
-            IconButton(onClick = { showMenu = !showMenu }) {
-                Icon(
-                    Icons.Default.MoreVert,
-                    contentDescription = stringResource(R.string.more)
-                )
-            }
-            DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(id = R.string.share)) },
-                    onClick = {
-                        viewModel.shareConfigFile()
-                        showMenu = false
-                    })
-            }
         }, scrollBehavior = scrollBehavior
         )
     }, snackbarHost = { SnackbarHost(snackbarHostState) }, content = { paddingValues ->

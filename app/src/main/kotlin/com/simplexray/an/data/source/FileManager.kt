@@ -93,39 +93,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
         }
     }
 
-    suspend fun importConfigFromContent(content: String): String? {
-        return withContext(Dispatchers.IO) {
-            if (content.isEmpty()) {
-                Log.w(TAG, "Content to import is empty.")
-                return@withContext null
-            }
-
-            val formattedContent = try {
-                ConfigUtils.formatConfigContent(configContent)
-            } catch (e: JSONException) {
-                Log.e(TAG, "Invalid JSON format in provided content.", e)
-                return@withContext null
-            }
-
-            val filename = "$name.json"
-            val newFile = File(application.filesDir, filename)
-
-            try {
-                FileOutputStream(newFile).use { fileOutputStream ->
-                    fileOutputStream.write(formattedContent.toByteArray(StandardCharsets.UTF_8))
-                }
-                Log.d(
-                    TAG,
-                    "Successfully imported config from content to: ${newFile.absolutePath}"
-                )
-                newFile.absolutePath
-            } catch (e: IOException) {
-                Log.e(TAG, "Error saving imported config file from content.", e)
-                return@withContext null
-            }
-        }
-    }
-
     suspend fun deleteConfigFile(fileToDelete: File): Boolean {
         return withContext(Dispatchers.IO) {
             if (fileToDelete.delete()) {

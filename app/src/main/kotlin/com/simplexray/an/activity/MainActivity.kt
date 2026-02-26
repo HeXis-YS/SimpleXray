@@ -39,7 +39,6 @@ class MainActivity : ComponentActivity() {
         mainViewModel.reloadView = { initView() }
         initView()
 
-        processShareIntent(intent)
         Log.d(TAG, "MainActivity onCreate called.")
     }
 
@@ -76,14 +75,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-        intent?.let {
-            processShareIntent(intent)
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "Activity Coroutine Scope cancelled.")
@@ -100,38 +91,6 @@ class MainActivity : ComponentActivity() {
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
         insetsController.isAppearanceLightStatusBars = !isDark
         Log.d(TAG, "MainActivity onConfigurationChanged called.")
-    }
-
-    private fun processShareIntent(intent: Intent) {
-        val currentIntentHash = intent.hashCode()
-        if (lastProcessedIntentHash == currentIntentHash) return
-        lastProcessedIntentHash = currentIntentHash
-
-        when (intent.action) {
-            Intent.ACTION_SEND -> {
-                intent.clipData?.getItemAt(0)?.uri?.let { uri ->
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        try {
-                            val text =
-                                contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
-                            text?.let { mainViewModel.handleSharedContent(it) }
-                        } catch (e: Exception) {
-                            Log.e("Share", "Error reading shared file", e)
-                        }
-                    }
-                }
-            }
-
-            Intent.ACTION_VIEW -> {
-                intent.data?.toString()?.let { uriString ->
-                    if (uriString.startsWith("simplexray://")) {
-                        lifecycleScope.launch {
-                            mainViewModel.handleSharedContent(uriString)
-                        }
-                    }
-                }
-            }
-        }
     }
 
     companion object {
