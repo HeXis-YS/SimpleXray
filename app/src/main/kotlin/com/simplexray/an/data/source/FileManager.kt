@@ -99,7 +99,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
                     prefs.apps ?: emptySet()
                 )
                 preferencesMap[Preferences.BYPASS_LAN] = prefs.bypassLan
-                preferencesMap[Preferences.HTTP_PROXY_ENABLED] = prefs.httpProxyEnabled
                 preferencesMap[Preferences.CONFIG_FILES_ORDER] = prefs.configFilesOrder
                 preferencesMap[Preferences.DISABLE_VPN] = prefs.disableVpn
                 preferencesMap[Preferences.CONNECTIVITY_TEST_TARGET] = prefs.connectivityTestTarget
@@ -246,11 +245,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
                     value = preferencesMap[Preferences.BYPASS_LAN]
                     if (value is Boolean) {
                         prefs.bypassLan = (value as Boolean?)!!
-                    }
-
-                    value = preferencesMap[Preferences.HTTP_PROXY_ENABLED]
-                    if (value is Boolean) {
-                        prefs.httpProxyEnabled = (value as Boolean?)!!
                     }
 
                     value = preferencesMap[Preferences.APPS]

@@ -382,20 +382,6 @@ fun SettingsScreen(
         )
 
         ListItem(
-            headlineContent = { Text(stringResource(R.string.http_proxy_title)) },
-            supportingContent = { Text(stringResource(R.string.http_proxy_summary)) },
-            trailingContent = {
-                Switch(
-                    checked = settingsState.switches.httpProxyEnabled,
-                    onCheckedChange = {
-                        mainViewModel.setHttpProxyEnabled(it)
-                    },
-                    enabled = !vpnDisabled
-                )
-            }
-        )
-
-        ListItem(
             headlineContent = { Text(stringResource(R.string.bypass_lan_title)) },
             supportingContent = { Text(stringResource(R.string.bypass_lan_summary)) },
             trailingContent = {

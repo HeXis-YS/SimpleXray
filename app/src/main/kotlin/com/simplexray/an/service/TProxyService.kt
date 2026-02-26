@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
-import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.Build
 import android.os.Handler
@@ -275,14 +274,6 @@ class TProxyService : VpnService() {
         setBlocking(false)
         setMtu(prefs.tunnelMtu)
 
-        if (prefs.bypassLan) {
-            addRoute("10.0.0.0", 8)
-            addRoute("172.16.0.0", 12)
-            addRoute("192.168.0.0", 16)
-        }
-        if (prefs.httpProxyEnabled) {
-            setHttpProxy(ProxyInfo.buildDirectProxy("::1", prefs.socksPort))
-        }
         if (prefs.ipv4) {
             addAddress(prefs.tunnelIpv4Address, prefs.tunnelIpv4Prefix)
             if (prefs.bypassLan) {

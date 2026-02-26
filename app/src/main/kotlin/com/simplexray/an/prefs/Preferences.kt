@@ -217,12 +217,6 @@ class Preferences(context: Context) {
             setValueInProvider(BYPASS_LAN, enable)
         }
 
-    var httpProxyEnabled: Boolean
-        get() = getBooleanPref(HTTP_PROXY_ENABLED, true)
-        set(enable) {
-            setValueInProvider(HTTP_PROXY_ENABLED, enable)
-        }
-
     var customGeoipImported: Boolean
         get() = getBooleanPref(CUSTOM_GEOIP_IMPORTED, false)
         set(imported) {
@@ -305,7 +299,6 @@ class Preferences(context: Context) {
         const val ENABLE: String = "Enable"
         const val SELECTED_CONFIG_PATH: String = "SelectedConfigPath"
         const val BYPASS_LAN: String = "BypassLan"
-        const val HTTP_PROXY_ENABLED: String = "HttpProxyEnabled"
         const val CUSTOM_GEOIP_IMPORTED: String = "CustomGeoipImported"
         const val CUSTOM_GEOSITE_IMPORTED: String = "CustomGeositeImported"
         const val CONFIG_FILES_ORDER: String = "ConfigFilesOrder"
