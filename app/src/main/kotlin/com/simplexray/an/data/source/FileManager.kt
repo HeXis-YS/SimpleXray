@@ -1,33 +1,26 @@
 package com.simplexray.an.data.source
 
 import android.app.Application
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.res.AssetManager
 import android.net.Uri
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.simplexray.an.R
-import com.simplexray.an.common.ConfigUtils
 import com.simplexray.an.common.FilenameValidator
 import com.simplexray.an.prefs.Preferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONException
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
-import java.util.Base64
 import java.util.Date
 import java.util.Locale
 import java.util.zip.DataFormatException
@@ -59,19 +52,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
             sb.append(String.format("%02x", hashByte))
         }
         return sb.toString()
-    }
-
-    private fun getClipboardContent(context: Context): String? {
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        if (clipboard.hasPrimaryClip()) {
-            val clipData: ClipData? = clipboard.primaryClip
-            if (clipData != null && clipData.itemCount > 0) {
-                val item: ClipData.Item = clipData.getItemAt(0)
-                val text: CharSequence? = item.text
-                return text?.toString()
-            }
-        }
-        return null
     }
 
     suspend fun createConfigFile(assets: AssetManager): String? {

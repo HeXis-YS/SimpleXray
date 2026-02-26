@@ -47,8 +47,6 @@ import com.simplexray.an.common.ROUTE_LOG
 import com.simplexray.an.common.ROUTE_SETTINGS
 import com.simplexray.an.viewmodel.LogViewModel
 import com.simplexray.an.viewmodel.MainViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun AppScaffold(

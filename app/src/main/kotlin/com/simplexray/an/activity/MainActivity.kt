@@ -1,6 +1,5 @@
 package com.simplexray.an.activity
 
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -19,13 +18,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.lifecycleScope
 import com.simplexray.an.common.ThemeMode
 import com.simplexray.an.ui.navigation.AppNavHost
 import com.simplexray.an.viewmodel.MainViewModel
 import com.simplexray.an.viewmodel.MainViewModelFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels { MainViewModelFactory(application) }
@@ -95,6 +91,5 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val TAG = "MainActivity"
-        private var lastProcessedIntentHash: Int = 0
     }
 }
