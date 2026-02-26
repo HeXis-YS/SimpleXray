@@ -528,29 +528,24 @@ fun SettingsScreen(
         PreferenceCategoryTitle(stringResource(R.string.about))
 
         ListItem(
-            headlineContent = { Text(stringResource(R.string.version)) },
-            supportingContent = { Text(settingsState.info.appVersion) }
-        )
-
-        ListItem(
-            headlineContent = { Text(stringResource(R.string.kernel)) },
-            supportingContent = { Text(settingsState.info.kernelVersion) }
-        )
-
-        ListItem(
             modifier = Modifier.clickable {
                 val browserIntent =
                     Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.source_url)))
                 context.startActivity(browserIntent)
             },
-            headlineContent = { Text(stringResource(R.string.source)) },
-            supportingContent = { Text(stringResource(R.string.open_source)) },
+            headlineContent = { Text(stringResource(R.string.version)) },
+            supportingContent = { Text(settingsState.info.appVersion) },
             trailingContent = {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null
                 )
             }
+        )
+
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.kernel)) },
+            supportingContent = { Text(settingsState.info.kernelVersion) }
         )
     }
 }
