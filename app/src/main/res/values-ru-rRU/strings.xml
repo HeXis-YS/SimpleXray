@@ -108,12 +108,6 @@
     <string name="stats_num_gc">Количество сборок мусора</string>
     <string name="stats_alloc">Выделенная память</string>
     <string name="stats_uptime">Время работы</string>
-    <string name="check_for_updates">Проверить обновления</string>
-    <string name="no_new_version_available">Новых версий нет</string>
-    <string name="failed_to_check_for_updates">Ошибка проверки обновлений</string>
-    <string name="new_version_available_title">Доступна новая версия</string>
-    <string name="new_version_available_message">Доступна новая версия (%1$s). Хотите скачать?</string>
-    <string name="download">Скачать</string>
     <string name="theme_title">Тема</string>
     <string name="theme_summary">Выберите светлую или тёмную тему</string>
     <string name="theme_light">Светлая</string>
