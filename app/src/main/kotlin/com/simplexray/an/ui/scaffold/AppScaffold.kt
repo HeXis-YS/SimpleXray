@@ -57,7 +57,6 @@ fun AppScaffold(
     mainViewModel: MainViewModel,
     logViewModel: LogViewModel,
     onCreateNewConfigFileAndEdit: () -> Unit,
-    onImportConfigFromClipboard: () -> Unit,
     onPerformExport: () -> Unit,
     onPerformBackup: () -> Unit,
     onPerformRestore: () -> Unit,
@@ -86,7 +85,6 @@ fun AppScaffold(
             AppTopAppBar(
                 currentRoute,
                 onCreateNewConfigFileAndEdit,
-                onImportConfigFromClipboard,
                 onPerformExport,
                 onPerformBackup,
                 onPerformRestore,
@@ -119,7 +117,6 @@ fun AppScaffold(
 fun AppTopAppBar(
     currentRoute: String?,
     onCreateNewConfigFileAndEdit: () -> Unit,
-    onImportConfigFromClipboard: () -> Unit,
     onPerformExport: () -> Unit,
     onPerformBackup: () -> Unit,
     onPerformRestore: () -> Unit,
@@ -225,7 +222,6 @@ fun AppTopAppBar(
                 TopAppBarActions(
                     currentRoute = currentRoute,
                     onCreateNewConfigFileAndEdit = onCreateNewConfigFileAndEdit,
-                    onImportConfigFromClipboard = onImportConfigFromClipboard,
                     onPerformExport = onPerformExport,
                     onPerformBackup = onPerformBackup,
                     onPerformRestore = onPerformRestore,
@@ -246,7 +242,6 @@ fun AppTopAppBar(
 private fun TopAppBarActions(
     currentRoute: String?,
     onCreateNewConfigFileAndEdit: () -> Unit,
-    onImportConfigFromClipboard: () -> Unit,
     onPerformExport: () -> Unit,
     onPerformBackup: () -> Unit,
     onPerformRestore: () -> Unit,
@@ -260,7 +255,6 @@ private fun TopAppBarActions(
     when (currentRoute) {
         "config" -> ConfigActions(
             onCreateNewConfigFileAndEdit = onCreateNewConfigFileAndEdit,
-            onImportConfigFromClipboard = onImportConfigFromClipboard,
             onSwitchVpnService = onSwitchVpnService,
             controlMenuClickable = controlMenuClickable,
             isServiceEnabled = isServiceEnabled,
@@ -283,7 +277,6 @@ private fun TopAppBarActions(
 @Composable
 private fun ConfigActions(
     onCreateNewConfigFileAndEdit: () -> Unit,
-    onImportConfigFromClipboard: () -> Unit,
     onSwitchVpnService: () -> Unit,
     controlMenuClickable: Boolean,
     isServiceEnabled: Boolean,
@@ -320,16 +313,6 @@ private fun ConfigActions(
             onClick = {
                 onCreateNewConfigFileAndEdit()
                 expanded = false
-            }
-        )
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.import_from_clipboard)) },
-            onClick = {
-                expanded = false
-                scope.launch {
-                    delay(100)
-                    onImportConfigFromClipboard()
-                }
             }
         )
         DropdownMenuItem(

@@ -12,7 +12,6 @@ import com.google.gson.reflect.TypeToken
 import com.simplexray.an.R
 import com.simplexray.an.common.ConfigUtils
 import com.simplexray.an.common.FilenameValidator
-import com.simplexray.an.common.configFormat.ConfigFormatConverter
 import com.simplexray.an.prefs.Preferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -94,27 +93,10 @@ class FileManager(private val application: Application, private val prefs: Prefe
         }
     }
 
-    suspend fun importConfigFromClipboard(): String? {
-        return withContext(Dispatchers.IO) {
-            val clipboardContent = getClipboardContent(application)
-
-            if (clipboardContent.isNullOrEmpty()) {
-                Log.w(TAG, "Clipboard is empty, null, or does not contain text.")
-                return@withContext null
-            }
-            importConfigFromContent(clipboardContent)
-        }
-    }
-
     suspend fun importConfigFromContent(content: String): String? {
         return withContext(Dispatchers.IO) {
             if (content.isEmpty()) {
                 Log.w(TAG, "Content to import is empty.")
-                return@withContext null
-            }
-
-            val (name, configContent) = ConfigFormatConverter.convert(application, content).getOrElse { e ->
-                Log.e(TAG, "Failed to parse config", e)
                 return@withContext null
             }
 

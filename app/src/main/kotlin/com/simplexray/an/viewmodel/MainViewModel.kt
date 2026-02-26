@@ -283,16 +283,6 @@ class MainViewModel(application: Application) :
         return filePath
     }
 
-    suspend fun importConfigFromClipboard(): String? {
-        val filePath = fileManager.importConfigFromClipboard()
-        if (filePath == null) {
-            _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.import_failed)))
-        } else {
-            refreshConfigFileList()
-        }
-        return filePath
-    }
-
     suspend fun handleSharedContent(content: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if (!fileManager.importConfigFromContent(content).isNullOrEmpty()) {

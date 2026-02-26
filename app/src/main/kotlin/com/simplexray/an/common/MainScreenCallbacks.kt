@@ -15,7 +15,6 @@ import java.io.File
 
 data class MainScreenCallbacks(
     val onCreateNewConfigFileAndEdit: () -> Unit,
-    val onImportConfigFromClipboard: () -> Unit,
     val onPerformExport: () -> Unit,
     val onPerformBackup: () -> Unit,
     val onPerformRestore: () -> Unit,
@@ -35,15 +34,6 @@ fun rememberMainScreenCallbacks(
     val onCreateNewConfigFileAndEdit: () -> Unit = {
         scope.launch {
             val filePath = mainViewModel.createConfigFile()
-            filePath?.let {
-                mainViewModel.editConfig(it)
-            }
-        }
-    }
-
-    val onImportConfigFromClipboard: () -> Unit = {
-        scope.launch {
-            val filePath = mainViewModel.importConfigFromClipboard()
             filePath?.let {
                 mainViewModel.editConfig(it)
             }
@@ -122,7 +112,6 @@ fun rememberMainScreenCallbacks(
 
     return MainScreenCallbacks(
         onCreateNewConfigFileAndEdit = onCreateNewConfigFileAndEdit,
-        onImportConfigFromClipboard = onImportConfigFromClipboard,
         onPerformExport = onPerformExport,
         onPerformBackup = onPerformBackup,
         onPerformRestore = onPerformRestore,
