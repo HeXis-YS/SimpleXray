@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.InterruptedIOException
@@ -271,9 +272,20 @@ class TProxyService : VpnService() {
             stopXray()
             return
         }
-        val tproxyConf = getTproxyConf(prefs)
+        val tproxyFile = File(cacheDir, "tproxy.conf")
+        try {
+            tproxyFile.createNewFile()
+            FileOutputStream(tproxyFile, false).use { fos ->
+                val tproxyConf = getTproxyConf(prefs)
+                fos.write(tproxyConf.toByteArray())
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, e.toString())
+            stopXray()
+            return
+        }
         tunFd?.fd?.let { fd ->
-            TProxyStartServiceWithConfig(tproxyConf, fd)
+            TProxyStartService(tproxyFile.absolutePath, fd)
         } ?: run {
             Log.e(TAG, "tunFd is null after establish()")
             stopXray()
@@ -391,10 +403,6 @@ class TProxyService : VpnService() {
         @JvmStatic
         @Suppress("FunctionName")
         private external fun TProxyStartService(configPath: String, fd: Int)
-
-        @JvmStatic
-        @Suppress("FunctionName")
-        private external fun TProxyStartServiceWithConfig(configContent: String, fd: Int)
 
         @JvmStatic
         @Suppress("FunctionName")
