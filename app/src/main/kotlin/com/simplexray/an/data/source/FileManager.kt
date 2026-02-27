@@ -92,8 +92,12 @@ class FileManager(private val application: Application, private val prefs: Prefe
                 val preferencesMap: MutableMap<String, Any> = mutableMapOf()
                 preferencesMap[Preferences.SOCKS_ADDR] = prefs.socksAddress
                 preferencesMap[Preferences.SOCKS_PORT] = prefs.socksPort
-                preferencesMap[Preferences.DNS_IPV4] = prefs.dnsIpv4
-                preferencesMap[Preferences.DNS_IPV6] = prefs.dnsIpv6
+                preferencesMap[Preferences.TUN_DNS_IPV4] = prefs.tunDnsIpv4
+                preferencesMap[Preferences.TUN_DNS_IPV6] = prefs.tunDnsIpv6
+                preferencesMap[Preferences.TUN_NAME] = prefs.tunName
+                preferencesMap[Preferences.TUN_MTU] = prefs.tunMtu
+                preferencesMap[Preferences.TUN_IPV4_CIDR] = prefs.tunIpv4Cidr
+                preferencesMap[Preferences.TUN_IPV6_CIDR] = prefs.tunIpv6Cidr
                 preferencesMap[Preferences.IPV6] = prefs.ipv6
                 preferencesMap[Preferences.APPS] = ArrayList(
                     prefs.apps ?: emptySet()
@@ -230,14 +234,75 @@ class FileManager(private val application: Application, private val prefs: Prefe
                         }
                     }
 
-                    value = preferencesMap[Preferences.DNS_IPV4]
+                    value = preferencesMap[Preferences.TUN_DNS_IPV4]
                     if (value is String) {
-                        prefs.dnsIpv4 = (value as String?)!!
+                        prefs.tunDnsIpv4 = value
                     }
 
-                    value = preferencesMap[Preferences.DNS_IPV6]
+                    value = preferencesMap[Preferences.TUN_DNS_IPV6]
                     if (value is String) {
-                        prefs.dnsIpv6 = (value as String?)!!
+                        prefs.tunDnsIpv6 = value
+                    }
+
+                    value = preferencesMap[Preferences.TUN_NAME]
+                    if (value is String) {
+                        prefs.tunName = value
+                    }
+
+                    value = preferencesMap[Preferences.TUN_MTU]
+                    if (value is Number) {
+                        prefs.tunMtu = value.toInt()
+                    } else if (value is String) {
+                        try {
+                            prefs.tunMtu = value.toInt()
+                        } catch (ignore: NumberFormatException) {
+                            Log.w(TAG, "Failed to parse TUN_MTU as integer: $value")
+                        }
+                    }
+
+                    value = preferencesMap[Preferences.TUN_IPV4_CIDR]
+                    if (value is String) {
+                        prefs.tunIpv4Cidr = value
+                    }
+
+                    value = preferencesMap[Preferences.TUN_IPV6_CIDR]
+                    if (value is String) {
+                        prefs.tunIpv6Cidr = value
+                    }
+
+                    val hasTunDnsIpv4 = preferencesMap[Preferences.TUN_DNS_IPV4] is String
+                    val hasTunDnsIpv6 = preferencesMap[Preferences.TUN_DNS_IPV6] is String
+
+                    // Backward compatibility: restore from old combined DNS key if new keys are absent.
+                    if (!hasTunDnsIpv4 || !hasTunDnsIpv6) {
+                        val legacyCombined = preferencesMap[Preferences.TUN_DNS] as? String
+                        val splitDns = splitDnsList(legacyCombined.orEmpty())
+                        if (!hasTunDnsIpv4) {
+                            val migratedIpv4 = splitDns.filterNot { it.contains(':') }.joinToString(",")
+                            if (migratedIpv4.isNotEmpty()) {
+                                prefs.tunDnsIpv4 = migratedIpv4
+                            }
+                        }
+                        if (!hasTunDnsIpv6) {
+                            val migratedIpv6 = splitDns.filter { it.contains(':') }.joinToString(",")
+                            if (migratedIpv6.isNotEmpty()) {
+                                prefs.tunDnsIpv6 = migratedIpv6
+                            }
+                        }
+                    }
+
+                    // Backward compatibility: restore from very old split DNS keys if new keys are absent.
+                    if (!hasTunDnsIpv4) {
+                        val legacyIpv4 = (preferencesMap[Preferences.DNS_IPV4] as? String)?.trim().orEmpty()
+                        if (legacyIpv4.isNotEmpty()) {
+                            prefs.tunDnsIpv4 = legacyIpv4
+                        }
+                    }
+                    if (!hasTunDnsIpv6) {
+                        val legacyIpv6 = (preferencesMap[Preferences.DNS_IPV6] as? String)?.trim().orEmpty()
+                        if (legacyIpv6.isNotEmpty()) {
+                            prefs.tunDnsIpv6 = legacyIpv6
+                        }
                     }
 
                     value = preferencesMap[Preferences.IPV6]
@@ -572,6 +637,10 @@ class FileManager(private val application: Application, private val prefs: Prefe
             size / 1024.0.pow(digitGroups.toDouble()),
             units[digitGroups]
         )
+    }
+
+    private fun splitDnsList(value: String): List<String> {
+        return value.split(',').map { it.trim() }.filter { it.isNotEmpty() }
     }
 
     suspend fun renameConfigFile(oldFile: File, newFile: File, newContent: String): Boolean =

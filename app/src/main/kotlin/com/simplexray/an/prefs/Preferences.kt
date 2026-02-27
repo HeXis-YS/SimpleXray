@@ -63,6 +63,10 @@ class Preferences(context: Context) {
         return value
     }
 
+    private fun splitDnsList(value: String): List<String> {
+        return value.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+    }
+
     private fun setValueInProvider(key: String, value: Any?) {
         val uri = PrefsContract.PrefsEntry.CONTENT_URI.buildUpon().appendPath(key).build()
         val values = ContentValues()
@@ -125,16 +129,81 @@ class Preferences(context: Context) {
             setValueInProvider(SOCKS_PORT, port.toString())
         }
 
-    var dnsIpv4: String
-        get() = getNonBlankStringPref(DNS_IPV4, DEFAULT_DNS_IPV4)
-        set(addr) {
-            setValueInProvider(DNS_IPV4, addr)
+    var tunDnsIpv4: String
+        get() {
+            val value = getPrefData(TUN_DNS_IPV4).first
+            if (!value.isNullOrBlank()) {
+                return value
+            }
+
+            val legacyCombined = getPrefData(TUN_DNS).first.orEmpty()
+            val combinedIpv4 = splitDnsList(legacyCombined).filterNot { it.contains(':') }
+            val legacyIpv4 = getPrefData(DNS_IPV4).first?.trim().orEmpty()
+            val fallback = combinedIpv4
+                .filter { it.isNotEmpty() }
+                .joinToString(",")
+                .ifEmpty { legacyIpv4.ifEmpty { DEFAULT_TUN_DNS_IPV4 } }
+            setValueInProvider(TUN_DNS_IPV4, fallback)
+            return fallback
+        }
+        set(value) {
+            setValueInProvider(TUN_DNS_IPV4, value)
         }
 
-    var dnsIpv6: String
-        get() = getNonBlankStringPref(DNS_IPV6, DEFAULT_DNS_IPV6)
-        set(addr) {
-            setValueInProvider(DNS_IPV6, addr)
+    var tunDnsIpv6: String
+        get() {
+            val value = getPrefData(TUN_DNS_IPV6).first
+            if (!value.isNullOrBlank()) {
+                return value
+            }
+
+            val legacyCombined = getPrefData(TUN_DNS).first.orEmpty()
+            val combinedIpv6 = splitDnsList(legacyCombined).filter { it.contains(':') }
+            val legacyIpv6 = getPrefData(DNS_IPV6).first?.trim().orEmpty()
+            val fallback = combinedIpv6
+                .filter { it.isNotEmpty() }
+                .joinToString(",")
+                .ifEmpty { legacyIpv6.ifEmpty { DEFAULT_TUN_DNS_IPV6 } }
+            setValueInProvider(TUN_DNS_IPV6, fallback)
+            return fallback
+        }
+        set(value) {
+            setValueInProvider(TUN_DNS_IPV6, value)
+        }
+
+    var tunName: String
+        get() = getNonBlankStringPref(TUN_NAME, DEFAULT_TUN_NAME)
+        set(value) {
+            setValueInProvider(TUN_NAME, value)
+        }
+
+    var tunMtu: Int
+        get() {
+            val value = getPrefData(TUN_MTU).first
+            val mtu = value?.toIntOrNull()
+            if (mtu != null && mtu in MIN_TUN_MTU..MAX_TUN_MTU) {
+                return mtu
+            }
+            if (!value.isNullOrEmpty()) {
+                Log.e(TAG, "Failed to parse TunMtu as Integer: $value")
+            }
+            setValueInProvider(TUN_MTU, DEFAULT_TUN_MTU.toString())
+            return DEFAULT_TUN_MTU
+        }
+        set(value) {
+            setValueInProvider(TUN_MTU, value.toString())
+        }
+
+    var tunIpv4Cidr: String
+        get() = getNonBlankStringPref(TUN_IPV4_CIDR, DEFAULT_TUN_IPV4_CIDR)
+        set(value) {
+            setValueInProvider(TUN_IPV4_CIDR, value)
+        }
+
+    var tunIpv6Cidr: String
+        get() = getNonBlankStringPref(TUN_IPV6_CIDR, DEFAULT_TUN_IPV6_CIDR)
+        set(value) {
+            setValueInProvider(TUN_IPV6_CIDR, value)
         }
 
     var ipv4: Boolean
@@ -199,21 +268,6 @@ class Preferences(context: Context) {
         set(value) {
             setValueInProvider(HEV_SOCKS5_TUNNEL_CONFIG, value)
         }
-
-    val tunnelMtu: Int
-        get() = 65535
-
-    val tunnelIpv4Address: String
-        get() = "192.0.0.8"
-
-    val tunnelIpv4Prefix: Int
-        get() = 32
-
-    val tunnelIpv6Address: String
-        get() = "fc00::1"
-
-    val tunnelIpv6Prefix: Int
-        get() = 128
 
     var selectedConfigPath: String?
         get() = getPrefData(SELECTED_CONFIG_PATH).first
@@ -308,12 +362,27 @@ class Preferences(context: Context) {
 
     companion object {
         const val DEFAULT_SOCKS_PORT: Int = 10809
-        const val DEFAULT_DNS_IPV4: String = "1.1.1.1"
-        const val DEFAULT_DNS_IPV6: String = "2606:4700:4700::1111"
+        const val MIN_TUN_MTU: Int = 68
+        const val MAX_TUN_MTU: Int = 65535
+        const val DEFAULT_TUN_DNS_IPV4: String = "1.1.1.1, 1.0.0.1"
+        const val DEFAULT_TUN_DNS_IPV6: String = "2606:4700:4700::1111, 2606:4700:4700::1001"
+        const val DEFAULT_TUN_NAME: String = "tun0"
+        const val DEFAULT_TUN_MTU: Int = 65535
+        const val DEFAULT_TUN_IPV4_CIDR: String = "192.0.0.8/32"
+        const val DEFAULT_TUN_IPV6_CIDR: String = "fc00::1/128"
         const val DEFAULT_CONNECTIVITY_TEST_SOCKS_SERVER: String = "127.0.0.1:10809"
         const val DEFAULT_CONNECTIVITY_TEST_TIMEOUT: Int = 3000
         const val SOCKS_ADDR: String = "SocksAddr"
         const val SOCKS_PORT: String = "SocksPort"
+        const val TUN_DNS_IPV4: String = "TunDnsIpv4"
+        const val TUN_DNS_IPV6: String = "TunDnsIpv6"
+        // Legacy key retained for backward compatibility with older combined DNS setting.
+        const val TUN_DNS: String = "TunDns"
+        const val TUN_NAME: String = "TunName"
+        const val TUN_MTU: String = "TunMtu"
+        const val TUN_IPV4_CIDR: String = "TunIpv4Cidr"
+        const val TUN_IPV6_CIDR: String = "TunIpv6Cidr"
+        // Legacy keys retained for backward compatibility with older backups.
         const val DNS_IPV4: String = "DnsIpv4"
         const val DNS_IPV6: String = "DnsIpv6"
         const val IPV4: String = "Ipv4"

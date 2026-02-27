@@ -29,11 +29,14 @@ data class FileStates(
 )
 
 data class SettingsState(
-    val socksPort: InputFieldState,
+    val tunDnsIpv4: InputFieldState,
+    val tunDnsIpv6: InputFieldState,
+    val tunName: InputFieldState,
+    val tunMtu: InputFieldState,
+    val tunIpv4Cidr: InputFieldState,
+    val tunIpv6Cidr: InputFieldState,
     val tunRoutes: InputFieldState,
     val hevSocks5TunnelConfig: InputFieldState,
-    val dnsIpv4: InputFieldState,
-    val dnsIpv6: InputFieldState,
     val switches: SwitchStates,
     val info: InfoStates,
     val files: FileStates,

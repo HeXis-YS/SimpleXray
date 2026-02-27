@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="socks_port">目标Socks端口</string>
-    <string name="dns_ipv4">DNS IPv4</string>
-    <string name="dns_ipv6">DNS IPv6</string>
     <string name="ipv6">IPv6</string>
     <string name="apps_title">分应用代理</string>
     <string name="apps_summary">选择需要代理的应用,否则使用全局模式</string>
@@ -32,8 +29,6 @@
     <string name="export">导出</string>
     <string name="invalid_ipv6">请输入有效的IPv6地址</string>
     <string name="invalid_ipv4">请输入有效的IPv4地址</string>
-    <string name="invalid_port">请输入有效的端口号</string>
-    <string name="invalid_port_range">端口号必须在1024到65535之间</string>
     <string name="import_from_clipboard">从剪贴板导入</string>
     <string name="import_failed">导入失败: 粘贴板上未找到配置</string>
     <string name="version">版本</string>
@@ -106,6 +101,19 @@
     <string name="tun_routes_preview">%1$d 条路由，首条：%2$s</string>
     <string name="tun_routes_empty">点击编辑 Tun 路由</string>
     <string name="invalid_tun_routes">路由格式无效，请按每行一个 IPv4 CIDR 填写。</string>
+    <string name="tun_dns_ipv4_title">Tun DNS IPv4</string>
+    <string name="tun_dns_ipv6_title">Tun DNS IPv6</string>
+    <string name="tun_dns_preview">%1$d 个服务器，首个：%2$s</string>
+    <string name="tun_dns_empty">点击编辑 Tun DNS 服务器</string>
+    <string name="tun_name_title">Tun 名称</string>
+    <string name="tun_mtu_title">Tun MTU</string>
+    <string name="tun_ipv4_cidr_title">Tun IPv4 CIDR</string>
+    <string name="tun_ipv6_cidr_title">Tun IPv6 CIDR</string>
+    <string name="invalid_tun_dns_ipv4">IPv4 DNS 格式无效，请使用逗号分隔 IPv4 地址。</string>
+    <string name="invalid_tun_dns_ipv6">IPv6 DNS 格式无效，请使用逗号分隔 IPv6 地址。</string>
+    <string name="invalid_tun_mtu_range">Tun MTU 必须在 68 到 65535 之间</string>
+    <string name="invalid_tun_ipv4_cidr">IPv4 CIDR 格式无效（例如：192.0.0.8/32）</string>
+    <string name="invalid_tun_ipv6_cidr">IPv6 CIDR 格式无效（例如：fc00::1/128）</string>
     <string name="hev_socks5_tunnel_config_title">hev-socks5-tunnel 配置</string>
     <string name="hev_socks5_tunnel_config_empty">点击编辑自定义 YAML</string>
     <string name="invalid_hev_socks5_tunnel_config">配置不能为空</string>

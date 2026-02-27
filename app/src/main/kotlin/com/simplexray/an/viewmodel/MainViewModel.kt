@@ -51,7 +51,6 @@ import java.net.InetSocketAddress
 import java.net.Proxy
 import java.net.Socket
 import java.net.URL
-import java.util.regex.Pattern
 import javax.net.ssl.SSLSocketFactory
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -80,11 +79,14 @@ class MainViewModel(application: Application) :
 
     private val _settingsState = MutableStateFlow(
         SettingsState(
-            socksPort = InputFieldState(prefs.socksPort.toString()),
+            tunDnsIpv4 = InputFieldState(prefs.tunDnsIpv4),
+            tunDnsIpv6 = InputFieldState(prefs.tunDnsIpv6),
+            tunName = InputFieldState(prefs.tunName),
+            tunMtu = InputFieldState(prefs.tunMtu.toString()),
+            tunIpv4Cidr = InputFieldState(prefs.tunIpv4Cidr),
+            tunIpv6Cidr = InputFieldState(prefs.tunIpv6Cidr),
             tunRoutes = InputFieldState(prefs.tunRoutes),
             hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
-            dnsIpv4 = InputFieldState(prefs.dnsIpv4),
-            dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
                 disableVpn = prefs.disableVpn,
@@ -161,11 +163,14 @@ class MainViewModel(application: Application) :
 
     private fun updateSettingsState() {
         _settingsState.value = _settingsState.value.copy(
-            socksPort = InputFieldState(prefs.socksPort.toString()),
+            tunDnsIpv4 = InputFieldState(prefs.tunDnsIpv4),
+            tunDnsIpv6 = InputFieldState(prefs.tunDnsIpv6),
+            tunName = InputFieldState(prefs.tunName),
+            tunMtu = InputFieldState(prefs.tunMtu.toString()),
+            tunIpv4Cidr = InputFieldState(prefs.tunIpv4Cidr),
+            tunIpv6Cidr = InputFieldState(prefs.tunIpv6Cidr),
             tunRoutes = InputFieldState(prefs.tunRoutes),
             hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
-            dnsIpv4 = InputFieldState(prefs.dnsIpv4),
-            dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
                 disableVpn = prefs.disableVpn,
@@ -311,40 +316,29 @@ class MainViewModel(application: Application) :
         fileManager.extractAssetsIfNeeded()
     }
 
-    fun updateSocksPort(portString: String): Boolean {
-        val normalizedPort = portString.trim()
-        if (normalizedPort.isEmpty()) {
-            val defaultPort = Preferences.DEFAULT_SOCKS_PORT
-            prefs.socksPort = defaultPort
+    fun updateTunDnsIpv4(value: String): Boolean {
+        val normalizedInput = value.trim()
+        if (normalizedInput.isEmpty()) {
+            val defaultValue = Preferences.DEFAULT_TUN_DNS_IPV4
+            prefs.tunDnsIpv4 = defaultValue
             _settingsState.value = _settingsState.value.copy(
-                socksPort = InputFieldState(defaultPort.toString())
+                tunDnsIpv4 = InputFieldState(defaultValue)
             )
             return true
         }
 
-        return try {
-            val port = normalizedPort.toInt()
-            if (port in 1025..65535) {
-                prefs.socksPort = port
-                _settingsState.value = _settingsState.value.copy(
-                    socksPort = InputFieldState(port.toString())
-                )
-                true
-            } else {
-                _settingsState.value = _settingsState.value.copy(
-                    socksPort = InputFieldState(
-                        value = normalizedPort,
-                        error = application.getString(R.string.invalid_port_range),
-                        isValid = false
-                    )
-                )
-                false
-            }
-        } catch (e: NumberFormatException) {
+        val normalizedDns = TProxyService.normalizeTunDnsIpv4(normalizedInput)
+        return if (normalizedDns != null) {
+            prefs.tunDnsIpv4 = normalizedDns
             _settingsState.value = _settingsState.value.copy(
-                socksPort = InputFieldState(
-                    value = normalizedPort,
-                    error = application.getString(R.string.invalid_port),
+                tunDnsIpv4 = InputFieldState(normalizedDns)
+            )
+            true
+        } else {
+            _settingsState.value = _settingsState.value.copy(
+                tunDnsIpv4 = InputFieldState(
+                    value = value,
+                    error = application.getString(R.string.invalid_tun_dns_ipv4),
                     isValid = false
                 )
             )
@@ -352,29 +346,29 @@ class MainViewModel(application: Application) :
         }
     }
 
-    fun updateDnsIpv4(ipv4Addr: String): Boolean {
-        val normalizedIpv4 = ipv4Addr.trim()
-        if (normalizedIpv4.isEmpty()) {
-            val defaultIpv4 = Preferences.DEFAULT_DNS_IPV4
-            prefs.dnsIpv4 = defaultIpv4
+    fun updateTunDnsIpv6(value: String): Boolean {
+        val normalizedInput = value.trim()
+        if (normalizedInput.isEmpty()) {
+            val defaultValue = Preferences.DEFAULT_TUN_DNS_IPV6
+            prefs.tunDnsIpv6 = defaultValue
             _settingsState.value = _settingsState.value.copy(
-                dnsIpv4 = InputFieldState(defaultIpv4)
+                tunDnsIpv6 = InputFieldState(defaultValue)
             )
             return true
         }
 
-        val matcher = IPV4_PATTERN.matcher(normalizedIpv4)
-        return if (matcher.matches()) {
-            prefs.dnsIpv4 = normalizedIpv4
+        val normalizedDns = TProxyService.normalizeTunDnsIpv6(normalizedInput)
+        return if (normalizedDns != null) {
+            prefs.tunDnsIpv6 = normalizedDns
             _settingsState.value = _settingsState.value.copy(
-                dnsIpv4 = InputFieldState(normalizedIpv4)
+                tunDnsIpv6 = InputFieldState(normalizedDns)
             )
             true
         } else {
             _settingsState.value = _settingsState.value.copy(
-                dnsIpv4 = InputFieldState(
-                    value = normalizedIpv4,
-                    error = application.getString(R.string.invalid_ipv4),
+                tunDnsIpv6 = InputFieldState(
+                    value = value,
+                    error = application.getString(R.string.invalid_tun_dns_ipv6),
                     isValid = false
                 )
             )
@@ -382,29 +376,105 @@ class MainViewModel(application: Application) :
         }
     }
 
-    fun updateDnsIpv6(ipv6Addr: String): Boolean {
-        val normalizedIpv6 = ipv6Addr.trim()
-        if (normalizedIpv6.isEmpty()) {
-            val defaultIpv6 = Preferences.DEFAULT_DNS_IPV6
-            prefs.dnsIpv6 = defaultIpv6
+    fun updateTunName(value: String): Boolean {
+        val normalizedValue = value.trim()
+        if (normalizedValue.isEmpty()) {
+            val defaultValue = Preferences.DEFAULT_TUN_NAME
+            prefs.tunName = defaultValue
             _settingsState.value = _settingsState.value.copy(
-                dnsIpv6 = InputFieldState(defaultIpv6)
+                tunName = InputFieldState(defaultValue)
             )
             return true
         }
 
-        val matcher = IPV6_PATTERN.matcher(normalizedIpv6)
-        return if (matcher.matches()) {
-            prefs.dnsIpv6 = normalizedIpv6
+        prefs.tunName = normalizedValue
+        _settingsState.value = _settingsState.value.copy(
+            tunName = InputFieldState(normalizedValue)
+        )
+        return true
+    }
+
+    fun updateTunMtu(value: String): Boolean {
+        val normalizedValue = value.trim()
+        if (normalizedValue.isEmpty()) {
+            val defaultValue = Preferences.DEFAULT_TUN_MTU
+            prefs.tunMtu = defaultValue
             _settingsState.value = _settingsState.value.copy(
-                dnsIpv6 = InputFieldState(normalizedIpv6)
+                tunMtu = InputFieldState(defaultValue.toString())
+            )
+            return true
+        }
+
+        val mtu = normalizedValue.toIntOrNull()
+        return if (mtu != null && mtu in Preferences.MIN_TUN_MTU..Preferences.MAX_TUN_MTU) {
+            prefs.tunMtu = mtu
+            _settingsState.value = _settingsState.value.copy(
+                tunMtu = InputFieldState(mtu.toString())
             )
             true
         } else {
             _settingsState.value = _settingsState.value.copy(
-                dnsIpv6 = InputFieldState(
-                    value = normalizedIpv6,
-                    error = application.getString(R.string.invalid_ipv6),
+                tunMtu = InputFieldState(
+                    value = normalizedValue,
+                    error = application.getString(R.string.invalid_tun_mtu_range),
+                    isValid = false
+                )
+            )
+            false
+        }
+    }
+
+    fun updateTunIpv4Cidr(value: String): Boolean {
+        val normalizedValue = value.trim()
+        if (normalizedValue.isEmpty()) {
+            val defaultValue = Preferences.DEFAULT_TUN_IPV4_CIDR
+            prefs.tunIpv4Cidr = defaultValue
+            _settingsState.value = _settingsState.value.copy(
+                tunIpv4Cidr = InputFieldState(defaultValue)
+            )
+            return true
+        }
+
+        return if (TProxyService.parseTunIpv4Cidr(normalizedValue) != null) {
+            prefs.tunIpv4Cidr = normalizedValue
+            _settingsState.value = _settingsState.value.copy(
+                tunIpv4Cidr = InputFieldState(normalizedValue)
+            )
+            true
+        } else {
+            _settingsState.value = _settingsState.value.copy(
+                tunIpv4Cidr = InputFieldState(
+                    value = normalizedValue,
+                    error = application.getString(R.string.invalid_tun_ipv4_cidr),
+                    isValid = false
+                )
+            )
+            false
+        }
+    }
+
+    fun updateTunIpv6Cidr(value: String): Boolean {
+        val normalizedValue = value.trim()
+        if (normalizedValue.isEmpty()) {
+            val defaultValue = Preferences.DEFAULT_TUN_IPV6_CIDR
+            prefs.tunIpv6Cidr = defaultValue
+            _settingsState.value = _settingsState.value.copy(
+                tunIpv6Cidr = InputFieldState(defaultValue)
+            )
+            return true
+        }
+
+        return if (TProxyService.parseTunIpv6Cidr(normalizedValue) != null) {
+            prefs.tunIpv6Cidr = normalizedValue
+            _settingsState.value = _settingsState.value.copy(
+                tunIpv6Cidr = InputFieldState(normalizedValue)
+            )
+            true
+        } else {
+            _settingsState.value = _settingsState.value.copy(
+                tunIpv6Cidr = InputFieldState(
+                    value = normalizedValue,
+                    error = application.getString(R.string.invalid_tun_ipv6_cidr),
                     isValid = false
                 )
             )
@@ -1039,13 +1109,6 @@ class MainViewModel(application: Application) :
     }
 
     companion object {
-        private const val IPV4_REGEX =
-            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-        private val IPV4_PATTERN: Pattern = Pattern.compile(IPV4_REGEX)
-        private const val IPV6_REGEX =
-            "^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80::(fe80(:[0-9a-fA-F]{0,4})?){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))$"
-        private val IPV6_PATTERN: Pattern = Pattern.compile(IPV6_REGEX)
-
         fun parseSocksServerAddress(value: String): Pair<String, Int>? {
             val input = value.trim()
             if (input.isEmpty()) {

@@ -72,6 +72,32 @@ fun SettingsScreen(
     val geositeProgress by mainViewModel.geositeDownloadProgress.collectAsStateWithLifecycle()
 
     val vpnDisabled = settingsState.switches.disableVpn
+    val tunDnsIpv4List = settingsState.tunDnsIpv4.value
+        .split(',')
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+    val tunDnsIpv4Preview = if (tunDnsIpv4List.isEmpty()) {
+        stringResource(R.string.tun_dns_empty)
+    } else {
+        stringResource(
+            R.string.tun_dns_preview,
+            tunDnsIpv4List.size,
+            tunDnsIpv4List.first()
+        )
+    }
+    val tunDnsIpv6List = settingsState.tunDnsIpv6.value
+        .split(',')
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+    val tunDnsIpv6Preview = if (tunDnsIpv6List.isEmpty()) {
+        stringResource(R.string.tun_dns_empty)
+    } else {
+        stringResource(
+            R.string.tun_dns_preview,
+            tunDnsIpv6List.size,
+            tunDnsIpv6List.first()
+        )
+    }
     val tunRoutesList = settingsState.tunRoutes.value.lineSequence()
         .map { it.trim() }
         .filter { it.isNotEmpty() }
@@ -362,27 +388,80 @@ fun SettingsScreen(
         )
 
         EditableListItemWithBottomSheet(
-            headline = stringResource(R.string.dns_ipv4),
-            currentValue = settingsState.dnsIpv4.value,
-            onValueConfirmed = { newValue -> mainViewModel.updateDnsIpv4(newValue) },
-            label = stringResource(R.string.dns_ipv4),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            isError = !settingsState.dnsIpv4.isValid,
-            errorMessage = settingsState.dnsIpv4.error,
+            headline = stringResource(R.string.tun_name_title),
+            currentValue = settingsState.tunName.value,
+            onValueConfirmed = { newValue -> mainViewModel.updateTunName(newValue) },
+            label = stringResource(R.string.tun_name_title),
+            isError = !settingsState.tunName.isValid,
+            errorMessage = settingsState.tunName.error,
             enabled = !vpnDisabled,
             sheetState = sheetState,
             scope = scope
         )
 
         EditableListItemWithBottomSheet(
-            headline = stringResource(R.string.dns_ipv6),
-            currentValue = settingsState.dnsIpv6.value,
-            onValueConfirmed = { newValue -> mainViewModel.updateDnsIpv6(newValue) },
-            label = stringResource(R.string.dns_ipv6),
+            headline = stringResource(R.string.tun_mtu_title),
+            currentValue = settingsState.tunMtu.value,
+            onValueConfirmed = { newValue -> mainViewModel.updateTunMtu(newValue) },
+            label = stringResource(R.string.tun_mtu_title),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = !settingsState.tunMtu.isValid,
+            errorMessage = settingsState.tunMtu.error,
+            enabled = !vpnDisabled,
+            sheetState = sheetState,
+            scope = scope
+        )
+
+        EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.tun_ipv4_cidr_title),
+            currentValue = settingsState.tunIpv4Cidr.value,
+            onValueConfirmed = { newValue -> mainViewModel.updateTunIpv4Cidr(newValue) },
+            label = stringResource(R.string.tun_ipv4_cidr_title),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-            isError = !settingsState.dnsIpv6.isValid,
-            errorMessage = settingsState.dnsIpv6.error,
-            enabled = settingsState.switches.ipv6Enabled && !vpnDisabled,
+            isError = !settingsState.tunIpv4Cidr.isValid,
+            errorMessage = settingsState.tunIpv4Cidr.error,
+            enabled = !vpnDisabled,
+            sheetState = sheetState,
+            scope = scope
+        )
+
+        EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.tun_ipv6_cidr_title),
+            currentValue = settingsState.tunIpv6Cidr.value,
+            onValueConfirmed = { newValue -> mainViewModel.updateTunIpv6Cidr(newValue) },
+            label = stringResource(R.string.tun_ipv6_cidr_title),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            isError = !settingsState.tunIpv6Cidr.isValid,
+            errorMessage = settingsState.tunIpv6Cidr.error,
+            enabled = !vpnDisabled,
+            sheetState = sheetState,
+            scope = scope
+        )
+
+        EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.tun_dns_ipv4_title),
+            currentValue = settingsState.tunDnsIpv4.value,
+            supportingValue = tunDnsIpv4Preview,
+            onValueConfirmed = { newValue -> mainViewModel.updateTunDnsIpv4(newValue) },
+            label = stringResource(R.string.tun_dns_ipv4_title),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            isError = !settingsState.tunDnsIpv4.isValid,
+            errorMessage = settingsState.tunDnsIpv4.error,
+            enabled = !vpnDisabled,
+            sheetState = sheetState,
+            scope = scope
+        )
+
+        EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.tun_dns_ipv6_title),
+            currentValue = settingsState.tunDnsIpv6.value,
+            supportingValue = tunDnsIpv6Preview,
+            onValueConfirmed = { newValue -> mainViewModel.updateTunDnsIpv6(newValue) },
+            label = stringResource(R.string.tun_dns_ipv6_title),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            isError = !settingsState.tunDnsIpv6.isValid,
+            errorMessage = settingsState.tunDnsIpv6.error,
+            enabled = !vpnDisabled,
             sheetState = sheetState,
             scope = scope
         )

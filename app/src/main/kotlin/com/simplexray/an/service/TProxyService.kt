@@ -302,22 +302,43 @@ class TProxyService : VpnService() {
 
     private fun getVpnBuilder(prefs: Preferences): Builder = Builder().apply {
         setBlocking(false)
-        setMtu(prefs.tunnelMtu)
+        setSession(prefs.tunName)
+        setMtu(prefs.tunMtu)
 
         if (prefs.ipv4) {
-            addAddress(prefs.tunnelIpv4Address, prefs.tunnelIpv4Prefix)
+            val ipv4Cidr = parseTunIpv4Cidr(prefs.tunIpv4Cidr)
+                ?: parseTunIpv4Cidr(Preferences.DEFAULT_TUN_IPV4_CIDR)
+            ipv4Cidr?.let { (address, prefix) ->
+                addAddress(address, prefix)
+            }
             val routeSpec = parseTunRoutes(prefs.tunRoutes)
                 ?: parseTunRoutes(resources.getStringArray(R.array.default_tun_routes).joinToString("\n"))
                 ?: emptyList()
             for ((address, prefix) in routeSpec) {
                 addRoute(address, prefix)
             }
-            prefs.dnsIpv4.takeIf { it.isNotEmpty() }?.also { addDnsServer(it) }
+
+            val dnsIpv4Servers = parseTunDnsServers(prefs.tunDnsIpv4, IPV4_PATTERN)
+                ?: parseTunDnsServers(Preferences.DEFAULT_TUN_DNS_IPV4, IPV4_PATTERN)
+                ?: emptyList()
+            for (server in dnsIpv4Servers) {
+                addDnsServer(server)
+            }
         }
         if (prefs.ipv6) {
-            addAddress(prefs.tunnelIpv6Address, prefs.tunnelIpv6Prefix)
+            val ipv6Cidr = parseTunIpv6Cidr(prefs.tunIpv6Cidr)
+                ?: parseTunIpv6Cidr(Preferences.DEFAULT_TUN_IPV6_CIDR)
+            ipv6Cidr?.let { (address, prefix) ->
+                addAddress(address, prefix)
+            }
             addRoute("::", 0)
-            prefs.dnsIpv6.takeIf { it.isNotEmpty() }?.also { addDnsServer(it) }
+
+            val dnsIpv6Servers = parseTunDnsServers(prefs.tunDnsIpv6, IPV6_PATTERN)
+                ?: parseTunDnsServers(Preferences.DEFAULT_TUN_DNS_IPV6, IPV6_PATTERN)
+                ?: emptyList()
+            for (server in dnsIpv6Servers) {
+                addDnsServer(server)
+            }
         }
 
         prefs.apps?.forEach { appName ->
@@ -392,9 +413,12 @@ class TProxyService : VpnService() {
         private const val BROADCAST_DELAY_MS: Long = 3000
         private const val IPV4_REGEX =
             "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        private const val IPV6_REGEX =
+            "^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80::(fe80(:[0-9a-fA-F]{0,4})?){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))$"
         private val HEV_LOG_FILE_REGEX = Regex("(?m)^\\s*log-file\\s*:")
         private val HEV_MISC_SECTION_REGEX = Regex("(?m)^\\s*misc\\s*:\\s*$")
         private val IPV4_PATTERN: Pattern = Pattern.compile(IPV4_REGEX)
+        private val IPV6_PATTERN: Pattern = Pattern.compile(IPV6_REGEX)
 
         init {
             System.loadLibrary("hev-socks5-tunnel")
@@ -437,6 +461,44 @@ class TProxyService : VpnService() {
             return parseTunRoutes(routes) != null
         }
 
+        fun normalizeTunDnsIpv4(servers: String): String? {
+            return parseTunDnsServers(servers, IPV4_PATTERN)?.joinToString(",")
+        }
+
+        fun normalizeTunDnsIpv6(servers: String): String? {
+            return parseTunDnsServers(servers, IPV6_PATTERN)?.joinToString(",")
+        }
+
+        fun parseTunIpv4Cidr(value: String): Pair<String, Int>? {
+            val cidr = value.trim()
+            val parts = cidr.split("/", limit = 2)
+            if (parts.size != 2 || !IPV4_PATTERN.matcher(parts[0]).matches()) {
+                return null
+            }
+
+            val prefix = parts[1].toIntOrNull() ?: return null
+            if (prefix !in 0..32) {
+                return null
+            }
+
+            return parts[0] to prefix
+        }
+
+        fun parseTunIpv6Cidr(value: String): Pair<String, Int>? {
+            val cidr = value.trim()
+            val parts = cidr.split("/", limit = 2)
+            if (parts.size != 2 || !IPV6_PATTERN.matcher(parts[0]).matches()) {
+                return null
+            }
+
+            val prefix = parts[1].toIntOrNull() ?: return null
+            if (prefix !in 0..128) {
+                return null
+            }
+
+            return parts[0] to prefix
+        }
+
         private fun parseTunRoutes(routes: String): List<Pair<String, Int>>? {
             val parsedRoutes = mutableListOf<Pair<String, Int>>()
             for (line in routes.lineSequence()) {
@@ -445,19 +507,26 @@ class TProxyService : VpnService() {
                     continue
                 }
 
-                val parts = route.split("/", limit = 2)
-                if (parts.size != 2 || !IPV4_PATTERN.matcher(parts[0]).matches()) {
-                    return null
-                }
-
-                val prefix = parts[1].toIntOrNull() ?: return null
-                if (prefix !in 0..32) {
-                    return null
-                }
-
-                parsedRoutes.add(parts[0] to prefix)
+                val parsedRoute = parseTunIpv4Cidr(route) ?: return null
+                parsedRoutes.add(parsedRoute)
             }
             return parsedRoutes.takeIf { it.isNotEmpty() }
+        }
+
+        private fun parseTunDnsServers(servers: String, pattern: Pattern): List<String>? {
+            val parsedServers = servers
+                .split(',')
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+            if (parsedServers.isEmpty()) {
+                return null
+            }
+
+            return if (parsedServers.all { pattern.matcher(it).matches() }) {
+                parsedServers
+            } else {
+                null
+            }
         }
 
     }

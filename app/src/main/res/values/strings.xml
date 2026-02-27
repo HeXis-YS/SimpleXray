@@ -5,9 +5,6 @@
     <string name="geoip_url" translatable="false">https://ghfast.top/https://github.com/HeXis-YS/xray-geodata-cut/releases/download/rolling/geoip-client.dat</string>
     <string name="geosite_url" translatable="false">https://ghfast.top/https://github.com/HeXis-YS/xray-geodata-cut/releases/download/rolling/geosite-client.dat</string>
     <string name="connectivity_test_url" translatable="false">http://www.gstatic.com/generate_204</string>
-    <string name="socks_port">Target SOCKS Port</string>
-    <string name="dns_ipv4">DNS IPv4</string>
-    <string name="dns_ipv6">DNS IPv6</string>
     <string name="ipv6">IPv6</string>
     <string name="apps_title">App-based Proxy</string>
     <string name="apps_summary">Select apps to be proxied, otherwise use global mode.</string>
@@ -37,8 +34,6 @@
     <string name="export">Export</string>
     <string name="invalid_ipv6">Please enter a valid IPv6 address</string>
     <string name="invalid_ipv4">Please enter a valid IPv4 address</string>
-    <string name="invalid_port">Please enter a valid port number</string>
-    <string name="invalid_port_range">Port number must be between 1024 and 65535</string>
     <string name="import_from_clipboard">Import Clipboard</string>
     <string name="import_failed">Import failed: No config found on clipboard</string>
     <string name="version">Version</string>
@@ -111,6 +106,19 @@
     <string name="tun_routes_preview">%1$d routes, first: %2$s</string>
     <string name="tun_routes_empty">Tap to edit tunnel routes</string>
     <string name="invalid_tun_routes">Invalid routes format. Use one IPv4 CIDR per line.</string>
+    <string name="tun_dns_ipv4_title">Tun DNS IPv4</string>
+    <string name="tun_dns_ipv6_title">Tun DNS IPv6</string>
+    <string name="tun_dns_preview">%1$d servers, first: %2$s</string>
+    <string name="tun_dns_empty">Tap to edit tunnel DNS servers</string>
+    <string name="tun_name_title">Tun Name</string>
+    <string name="tun_mtu_title">Tun MTU</string>
+    <string name="tun_ipv4_cidr_title">Tun IPv4 CIDR</string>
+    <string name="tun_ipv6_cidr_title">Tun IPv6 CIDR</string>
+    <string name="invalid_tun_dns_ipv4">Invalid IPv4 DNS format. Use IPv4 addresses separated by commas.</string>
+    <string name="invalid_tun_dns_ipv6">Invalid IPv6 DNS format. Use IPv6 addresses separated by commas.</string>
+    <string name="invalid_tun_mtu_range">Tun MTU must be between 68 and 65535</string>
+    <string name="invalid_tun_ipv4_cidr">Invalid IPv4 CIDR format (example: 192.0.0.8/32)</string>
+    <string name="invalid_tun_ipv6_cidr">Invalid IPv6 CIDR format (example: fc00::1/128)</string>
     <string name="hev_socks5_tunnel_config_title">hev-socks5-tunnel config</string>
     <string name="hev_socks5_tunnel_config_empty">Tap to edit custom YAML</string>
     <string name="invalid_hev_socks5_tunnel_config">Configuration cannot be empty</string>
