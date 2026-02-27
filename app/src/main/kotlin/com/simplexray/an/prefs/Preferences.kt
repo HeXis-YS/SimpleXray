@@ -67,6 +67,27 @@ class Preferences(context: Context) {
         return value.split(',').map { it.trim() }.filter { it.isNotEmpty() }
     }
 
+    private fun getTunDnsPref(
+        key: String,
+        defaultValue: String,
+        legacyKey: String,
+        isIpv6: Boolean
+    ): String {
+        val value = getPrefData(key).first
+        if (!value.isNullOrBlank()) {
+            return value
+        }
+
+        val legacyCombined = splitDnsList(getPrefData(TUN_DNS).first.orEmpty())
+        val combinedFallback = legacyCombined
+            .filter { if (isIpv6) it.contains(':') else !it.contains(':') }
+            .joinToString(",")
+        val legacyValue = getPrefData(legacyKey).first?.trim().orEmpty()
+        val fallback = combinedFallback.ifEmpty { legacyValue.ifEmpty { defaultValue } }
+        setValueInProvider(key, fallback)
+        return fallback
+    }
+
     private fun setValueInProvider(key: String, value: Any?) {
         val uri = PrefsContract.PrefsEntry.CONTENT_URI.buildUpon().appendPath(key).build()
         val values = ContentValues()
@@ -130,43 +151,13 @@ class Preferences(context: Context) {
         }
 
     var tunDnsIpv4: String
-        get() {
-            val value = getPrefData(TUN_DNS_IPV4).first
-            if (!value.isNullOrBlank()) {
-                return value
-            }
-
-            val legacyCombined = getPrefData(TUN_DNS).first.orEmpty()
-            val combinedIpv4 = splitDnsList(legacyCombined).filterNot { it.contains(':') }
-            val legacyIpv4 = getPrefData(DNS_IPV4).first?.trim().orEmpty()
-            val fallback = combinedIpv4
-                .filter { it.isNotEmpty() }
-                .joinToString(",")
-                .ifEmpty { legacyIpv4.ifEmpty { DEFAULT_TUN_DNS_IPV4 } }
-            setValueInProvider(TUN_DNS_IPV4, fallback)
-            return fallback
-        }
+        get() = getTunDnsPref(TUN_DNS_IPV4, DEFAULT_TUN_DNS_IPV4, DNS_IPV4, isIpv6 = false)
         set(value) {
             setValueInProvider(TUN_DNS_IPV4, value)
         }
 
     var tunDnsIpv6: String
-        get() {
-            val value = getPrefData(TUN_DNS_IPV6).first
-            if (!value.isNullOrBlank()) {
-                return value
-            }
-
-            val legacyCombined = getPrefData(TUN_DNS).first.orEmpty()
-            val combinedIpv6 = splitDnsList(legacyCombined).filter { it.contains(':') }
-            val legacyIpv6 = getPrefData(DNS_IPV6).first?.trim().orEmpty()
-            val fallback = combinedIpv6
-                .filter { it.isNotEmpty() }
-                .joinToString(",")
-                .ifEmpty { legacyIpv6.ifEmpty { DEFAULT_TUN_DNS_IPV6 } }
-            setValueInProvider(TUN_DNS_IPV6, fallback)
-            return fallback
-        }
+        get() = getTunDnsPref(TUN_DNS_IPV6, DEFAULT_TUN_DNS_IPV6, DNS_IPV6, isIpv6 = true)
         set(value) {
             setValueInProvider(TUN_DNS_IPV6, value)
         }

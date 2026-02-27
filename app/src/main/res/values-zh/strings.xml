@@ -25,10 +25,7 @@
     <string name="delete_fail">删除失败</string>
     <string name="not_select_config">未选择配置文件</string>
     <string name="filename">文件名</string>
-    <string name="share">分享</string>
     <string name="export">导出</string>
-    <string name="invalid_ipv6">请输入有效的IPv6地址</string>
-    <string name="invalid_ipv4">请输入有效的IPv4地址</string>
     <string name="import_from_clipboard">从剪贴板导入</string>
     <string name="import_failed">导入失败: 粘贴板上未找到配置</string>
     <string name="version">版本</string>
@@ -55,7 +52,6 @@
     <string name="create_config_failed">配置创建失败</string>
     <string name="no_app_for_export">没有可用于导出的应用</string>
     <string name="export_failed">导出失败</string>
-    <string name="config_not_found">配置文件不存在</string>
     <string name="save_fail">保存失败</string>
     <string name="disable_vpn_title">禁用VPN接口</string>
     <string name="disable_vpn_summary">启用时，仅启动核心而不启用VPN</string>
@@ -97,13 +93,10 @@
     <string name="theme_dark">深色</string>
     <string name="auto">自动</string>
     <string name="tun_routes_title">Tun 路由</string>
-    <string name="tun_routes_summary">每行一个 CIDR 路由，例如：1.0.0.0/8</string>
-    <string name="tun_routes_preview">%1$d 条路由，首条：%2$s</string>
     <string name="tun_routes_empty">点击编辑 Tun 路由</string>
     <string name="invalid_tun_routes">路由格式无效，请按每行一个 IPv4 CIDR 填写。</string>
     <string name="tun_dns_ipv4_title">Tun DNS IPv4</string>
     <string name="tun_dns_ipv6_title">Tun DNS IPv6</string>
-    <string name="tun_dns_preview">%1$d 个服务器，首个：%2$s</string>
     <string name="tun_dns_empty">点击编辑 Tun DNS 服务器</string>
     <string name="tun_name_title">Tun 名称</string>
     <string name="tun_mtu_title">Tun MTU</string>
@@ -116,5 +109,4 @@
     <string name="invalid_tun_ipv6_cidr">IPv6 CIDR 格式无效（例如：fc00::1/128）</string>
     <string name="hev_socks5_tunnel_config_title">hev-socks5-tunnel 配置</string>
     <string name="hev_socks5_tunnel_config_empty">点击编辑自定义 YAML</string>
-    <string name="invalid_hev_socks5_tunnel_config">配置不能为空</string>
 </resources>

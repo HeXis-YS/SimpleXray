@@ -30,10 +30,7 @@
     <string name="delete_fail">Deletion failed</string>
     <string name="not_select_config">No profile selected</string>
     <string name="filename">Filename</string>
-    <string name="share">Share</string>
     <string name="export">Export</string>
-    <string name="invalid_ipv6">Please enter a valid IPv6 address</string>
-    <string name="invalid_ipv4">Please enter a valid IPv4 address</string>
     <string name="import_from_clipboard">Import Clipboard</string>
     <string name="import_failed">Import failed: No config found on clipboard</string>
     <string name="version">Version</string>
@@ -60,7 +57,6 @@
     <string name="create_config_failed">Configuration creation failed</string>
     <string name="no_app_for_export">No app available for export</string>
     <string name="export_failed">Export failed</string>
-    <string name="config_not_found">Configuration file not found</string>
     <string name="save_fail">Failed to save</string>
     <string name="disable_vpn_title">Disable VPN Interface</string>
     <string name="disable_vpn_summary">When enabled, only the core will launch, and the VPN interface will be disabled.</string>
@@ -102,13 +98,10 @@
     <string name="theme_dark">Dark</string>
     <string name="auto">Auto</string>
     <string name="tun_routes_title">Tun Routes</string>
-    <string name="tun_routes_summary">One CIDR route per line. Example: 1.0.0.0/8</string>
-    <string name="tun_routes_preview">%1$d routes, first: %2$s</string>
     <string name="tun_routes_empty">Tap to edit tunnel routes</string>
     <string name="invalid_tun_routes">Invalid routes format. Use one IPv4 CIDR per line.</string>
     <string name="tun_dns_ipv4_title">Tun DNS IPv4</string>
     <string name="tun_dns_ipv6_title">Tun DNS IPv6</string>
-    <string name="tun_dns_preview">%1$d servers, first: %2$s</string>
     <string name="tun_dns_empty">Tap to edit tunnel DNS servers</string>
     <string name="tun_name_title">Tun Name</string>
     <string name="tun_mtu_title">Tun MTU</string>
@@ -121,5 +114,4 @@
     <string name="invalid_tun_ipv6_cidr">Invalid IPv6 CIDR format (example: fc00::1/128)</string>
     <string name="hev_socks5_tunnel_config_title">hev-socks5-tunnel config</string>
     <string name="hev_socks5_tunnel_config_empty">Tap to edit custom YAML</string>
-    <string name="invalid_hev_socks5_tunnel_config">Configuration cannot be empty</string>
 </resources>

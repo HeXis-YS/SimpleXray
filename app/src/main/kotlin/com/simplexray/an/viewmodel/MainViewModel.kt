@@ -316,29 +316,31 @@ class MainViewModel(application: Application) :
         fileManager.extractAssetsIfNeeded()
     }
 
-    fun updateTunDnsIpv4(value: String): Boolean {
+    private fun updateTunDnsField(
+        value: String,
+        defaultValue: String,
+        normalize: (String) -> String?,
+        invalidMessage: String,
+        onValid: (String) -> Unit,
+        stateUpdater: SettingsState.(InputFieldState) -> SettingsState
+    ): Boolean {
         val normalizedInput = value.trim()
         if (normalizedInput.isEmpty()) {
-            val defaultValue = Preferences.DEFAULT_TUN_DNS_IPV4
-            prefs.tunDnsIpv4 = defaultValue
-            _settingsState.value = _settingsState.value.copy(
-                tunDnsIpv4 = InputFieldState(defaultValue)
-            )
+            onValid(defaultValue)
+            _settingsState.value = _settingsState.value.stateUpdater(InputFieldState(defaultValue))
             return true
         }
 
-        val normalizedDns = TProxyService.normalizeTunDnsIpv4(normalizedInput)
+        val normalizedDns = normalize(normalizedInput)
         return if (normalizedDns != null) {
-            prefs.tunDnsIpv4 = normalizedDns
-            _settingsState.value = _settingsState.value.copy(
-                tunDnsIpv4 = InputFieldState(normalizedDns)
-            )
+            onValid(normalizedDns)
+            _settingsState.value = _settingsState.value.stateUpdater(InputFieldState(normalizedDns))
             true
         } else {
-            _settingsState.value = _settingsState.value.copy(
-                tunDnsIpv4 = InputFieldState(
+            _settingsState.value = _settingsState.value.stateUpdater(
+                InputFieldState(
                     value = value,
-                    error = application.getString(R.string.invalid_tun_dns_ipv4),
+                    error = invalidMessage,
                     isValid = false
                 )
             )
@@ -346,35 +348,23 @@ class MainViewModel(application: Application) :
         }
     }
 
-    fun updateTunDnsIpv6(value: String): Boolean {
-        val normalizedInput = value.trim()
-        if (normalizedInput.isEmpty()) {
-            val defaultValue = Preferences.DEFAULT_TUN_DNS_IPV6
-            prefs.tunDnsIpv6 = defaultValue
-            _settingsState.value = _settingsState.value.copy(
-                tunDnsIpv6 = InputFieldState(defaultValue)
-            )
-            return true
-        }
+    fun updateTunDnsIpv4(value: String): Boolean = updateTunDnsField(
+        value = value,
+        defaultValue = Preferences.DEFAULT_TUN_DNS_IPV4,
+        normalize = TProxyService::normalizeTunDnsIpv4,
+        invalidMessage = application.getString(R.string.invalid_tun_dns_ipv4),
+        onValid = { prefs.tunDnsIpv4 = it },
+        stateUpdater = { state -> copy(tunDnsIpv4 = state) }
+    )
 
-        val normalizedDns = TProxyService.normalizeTunDnsIpv6(normalizedInput)
-        return if (normalizedDns != null) {
-            prefs.tunDnsIpv6 = normalizedDns
-            _settingsState.value = _settingsState.value.copy(
-                tunDnsIpv6 = InputFieldState(normalizedDns)
-            )
-            true
-        } else {
-            _settingsState.value = _settingsState.value.copy(
-                tunDnsIpv6 = InputFieldState(
-                    value = value,
-                    error = application.getString(R.string.invalid_tun_dns_ipv6),
-                    isValid = false
-                )
-            )
-            false
-        }
-    }
+    fun updateTunDnsIpv6(value: String): Boolean = updateTunDnsField(
+        value = value,
+        defaultValue = Preferences.DEFAULT_TUN_DNS_IPV6,
+        normalize = TProxyService::normalizeTunDnsIpv6,
+        invalidMessage = application.getString(R.string.invalid_tun_dns_ipv6),
+        onValid = { prefs.tunDnsIpv6 = it },
+        stateUpdater = { state -> copy(tunDnsIpv6 = state) }
+    )
 
     fun updateTunName(value: String): Boolean {
         val normalizedValue = value.trim()

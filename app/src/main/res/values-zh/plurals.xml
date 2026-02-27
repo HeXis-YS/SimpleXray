@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="tun_routes_preview">
+        <item quantity="other">%1$d 条路由</item>
+    </plurals>
+    <plurals name="tun_dns_preview">
+        <item quantity="other">%1$d 个服务器</item>
+    </plurals>
+</resources>

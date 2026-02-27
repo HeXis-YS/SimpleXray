@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -79,10 +80,10 @@ fun SettingsScreen(
     val tunDnsIpv4Preview = if (tunDnsIpv4List.isEmpty()) {
         stringResource(R.string.tun_dns_empty)
     } else {
-        stringResource(
-            R.string.tun_dns_preview,
+        pluralStringResource(
+            R.plurals.tun_dns_preview,
             tunDnsIpv4List.size,
-            tunDnsIpv4List.first()
+            tunDnsIpv4List.size
         )
     }
     val tunDnsIpv6List = settingsState.tunDnsIpv6.value
@@ -92,10 +93,10 @@ fun SettingsScreen(
     val tunDnsIpv6Preview = if (tunDnsIpv6List.isEmpty()) {
         stringResource(R.string.tun_dns_empty)
     } else {
-        stringResource(
-            R.string.tun_dns_preview,
+        pluralStringResource(
+            R.plurals.tun_dns_preview,
             tunDnsIpv6List.size,
-            tunDnsIpv6List.first()
+            tunDnsIpv6List.size
         )
     }
     val tunRoutesList = settingsState.tunRoutes.value.lineSequence()
@@ -105,10 +106,10 @@ fun SettingsScreen(
     val tunRoutesPreview = if (tunRoutesList.isEmpty()) {
         stringResource(R.string.tun_routes_empty)
     } else {
-        stringResource(
-            R.string.tun_routes_preview,
+        pluralStringResource(
+            R.plurals.tun_routes_preview,
             tunRoutesList.size,
-            tunRoutesList.first()
+            tunRoutesList.size
         )
     }
     val hevSocks5TunnelConfigPreview = settingsState.hevSocks5TunnelConfig.value
