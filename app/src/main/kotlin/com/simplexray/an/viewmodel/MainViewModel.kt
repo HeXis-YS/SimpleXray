@@ -102,6 +102,7 @@ class MainViewModel(application: Application) :
                 isGeoipCustom = prefs.customGeoipImported,
                 isGeositeCustom = prefs.customGeositeImported
             ),
+            connectivityTestSocksServer = InputFieldState(prefs.connectivityTestSocksServer),
             connectivityTestTarget = InputFieldState(prefs.connectivityTestTarget),
             connectivityTestTimeout = InputFieldState(prefs.connectivityTestTimeout.toString())
         )
@@ -181,6 +182,7 @@ class MainViewModel(application: Application) :
                 isGeoipCustom = prefs.customGeoipImported,
                 isGeositeCustom = prefs.customGeositeImported
             ),
+            connectivityTestSocksServer = InputFieldState(prefs.connectivityTestSocksServer),
             connectivityTestTarget = InputFieldState(prefs.connectivityTestTarget),
             connectivityTestTimeout = InputFieldState(prefs.connectivityTestTimeout.toString())
         )
@@ -681,6 +683,33 @@ class MainViewModel(application: Application) :
         }
     }
 
+    fun updateConnectivityTestSocksServer(server: String) {
+        val normalizedServer = server.trim()
+        if (normalizedServer.isEmpty()) {
+            val defaultServer = Preferences.DEFAULT_CONNECTIVITY_TEST_SOCKS_SERVER
+            prefs.connectivityTestSocksServer = defaultServer
+            _settingsState.value = _settingsState.value.copy(
+                connectivityTestSocksServer = InputFieldState(defaultServer)
+            )
+            return
+        }
+
+        if (parseSocksServerAddress(normalizedServer) != null) {
+            prefs.connectivityTestSocksServer = normalizedServer
+            _settingsState.value = _settingsState.value.copy(
+                connectivityTestSocksServer = InputFieldState(normalizedServer)
+            )
+        } else {
+            _settingsState.value = _settingsState.value.copy(
+                connectivityTestSocksServer = InputFieldState(
+                    value = normalizedServer,
+                    error = application.getString(R.string.connectivity_test_invalid_socks_server),
+                    isValid = false
+                )
+            )
+        }
+    }
+
     fun updateConnectivityTestTimeout(timeout: String) {
         val normalizedTimeout = timeout.trim()
         if (normalizedTimeout.isEmpty()) {
@@ -712,6 +741,15 @@ class MainViewModel(application: Application) :
     fun testConnectivity() {
         viewModelScope.launch(Dispatchers.IO) {
             val prefs = prefs
+            val socksServer = parseSocksServerAddress(prefs.connectivityTestSocksServer)
+            if (socksServer == null) {
+                _uiEvent.trySend(
+                    MainViewUiEvent.ShowSnackbar(
+                        application.getString(R.string.connectivity_test_invalid_socks_server)
+                    )
+                )
+                return@launch
+            }
             val url: URL
             try {
                 url = URL(prefs.connectivityTestTarget)
@@ -723,8 +761,7 @@ class MainViewModel(application: Application) :
             val port = if (url.port > 0) url.port else url.defaultPort
             val path = if (url.path.isNullOrEmpty()) "/" else url.path
             val isHttps = url.protocol == "https"
-            val proxy =
-                Proxy(Proxy.Type.SOCKS, InetSocketAddress(prefs.socksAddress, prefs.socksPort))
+            val proxy = Proxy(Proxy.Type.SOCKS, InetSocketAddress(socksServer.first, socksServer.second))
             val timeout = prefs.connectivityTestTimeout
             val start = System.currentTimeMillis()
             try {
@@ -1008,6 +1045,43 @@ class MainViewModel(application: Application) :
         private const val IPV6_REGEX =
             "^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80::(fe80(:[0-9a-fA-F]{0,4})?){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))$"
         private val IPV6_PATTERN: Pattern = Pattern.compile(IPV6_REGEX)
+
+        fun parseSocksServerAddress(value: String): Pair<String, Int>? {
+            val input = value.trim()
+            if (input.isEmpty()) {
+                return null
+            }
+
+            val host: String
+            val portString: String
+            if (input.startsWith("[")) {
+                val closeBracketIndex = input.indexOf(']')
+                if (closeBracketIndex <= 1 || closeBracketIndex + 1 >= input.length) {
+                    return null
+                }
+                if (input[closeBracketIndex + 1] != ':') {
+                    return null
+                }
+                host = input.substring(1, closeBracketIndex).trim()
+                portString = input.substring(closeBracketIndex + 2).trim()
+            } else {
+                val separatorIndex = input.lastIndexOf(':')
+                if (separatorIndex <= 0 || separatorIndex >= input.length - 1) {
+                    return null
+                }
+                if (input.indexOf(':') != separatorIndex) {
+                    return null
+                }
+                host = input.substring(0, separatorIndex).trim()
+                portString = input.substring(separatorIndex + 1).trim()
+            }
+
+            val port = portString.toIntOrNull() ?: return null
+            if (host.isEmpty() || port !in 1..65535) {
+                return null
+            }
+            return host to port
+        }
 
         @Suppress("DEPRECATION")
         fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {

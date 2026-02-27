@@ -102,6 +102,8 @@ class FileManager(private val application: Application, private val prefs: Prefe
                 preferencesMap[Preferences.CONFIG_FILES_ORDER] = prefs.configFilesOrder
                 preferencesMap[Preferences.DISABLE_VPN] = prefs.disableVpn
                 preferencesMap[Preferences.CONNECTIVITY_TEST_TARGET] = prefs.connectivityTestTarget
+                preferencesMap[Preferences.CONNECTIVITY_TEST_SOCKS_SERVER] =
+                    prefs.connectivityTestSocksServer
                 preferencesMap[Preferences.CONNECTIVITY_TEST_TIMEOUT] =
                     prefs.connectivityTestTimeout
                 preferencesMap[Preferences.GEOIP_URL] = prefs.geoipUrl
@@ -274,6 +276,10 @@ class FileManager(private val application: Application, private val prefs: Prefe
                     value = preferencesMap[Preferences.CONNECTIVITY_TEST_TARGET]
                     if (value is String) {
                         prefs.connectivityTestTarget = value
+                    }
+                    value = preferencesMap[Preferences.CONNECTIVITY_TEST_SOCKS_SERVER]
+                    if (value is String) {
+                        prefs.connectivityTestSocksServer = value
                     }
                     value = preferencesMap[Preferences.CONNECTIVITY_TEST_TIMEOUT]
                     if (value is Number) {

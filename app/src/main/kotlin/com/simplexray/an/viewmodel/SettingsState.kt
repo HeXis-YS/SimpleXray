@@ -37,6 +37,7 @@ data class SettingsState(
     val switches: SwitchStates,
     val info: InfoStates,
     val files: FileStates,
+    val connectivityTestSocksServer: InputFieldState,
     val connectivityTestTarget: InputFieldState,
     val connectivityTestTimeout: InputFieldState
 )

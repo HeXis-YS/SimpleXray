@@ -260,6 +260,15 @@ class Preferences(context: Context) {
             setValueInProvider(CONNECTIVITY_TEST_TARGET, value)
         }
 
+    var connectivityTestSocksServer: String
+        get() = getNonBlankStringPref(
+            CONNECTIVITY_TEST_SOCKS_SERVER,
+            DEFAULT_CONNECTIVITY_TEST_SOCKS_SERVER
+        )
+        set(value) {
+            setValueInProvider(CONNECTIVITY_TEST_SOCKS_SERVER, value)
+        }
+
     var connectivityTestTimeout: Int
         get() {
             val timeout = getPrefData(CONNECTIVITY_TEST_TIMEOUT).first?.toIntOrNull()
@@ -301,6 +310,7 @@ class Preferences(context: Context) {
         const val DEFAULT_SOCKS_PORT: Int = 10809
         const val DEFAULT_DNS_IPV4: String = "1.1.1.1"
         const val DEFAULT_DNS_IPV6: String = "2606:4700:4700::1111"
+        const val DEFAULT_CONNECTIVITY_TEST_SOCKS_SERVER: String = "127.0.0.1:10809"
         const val DEFAULT_CONNECTIVITY_TEST_TIMEOUT: Int = 3000
         const val SOCKS_ADDR: String = "SocksAddr"
         const val SOCKS_PORT: String = "SocksPort"
@@ -319,6 +329,7 @@ class Preferences(context: Context) {
         const val TUN_ROUTES: String = "TunRoutes"
         const val HEV_SOCKS5_TUNNEL_CONFIG: String = "HevSocks5TunnelConfig"
         const val CONNECTIVITY_TEST_TARGET: String = "ConnectivityTestTarget"
+        const val CONNECTIVITY_TEST_SOCKS_SERVER: String = "ConnectivityTestSocksServer"
         const val CONNECTIVITY_TEST_TIMEOUT: String = "ConnectivityTestTimeout"
         const val GEOIP_URL: String = "GeoipUrl"
         const val GEOSITE_URL: String = "GeositeUrl"

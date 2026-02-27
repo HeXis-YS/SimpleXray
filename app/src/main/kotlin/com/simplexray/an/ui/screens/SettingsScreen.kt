@@ -348,19 +348,6 @@ fun SettingsScreen(
         )
 
         EditableListItemWithBottomSheet(
-            headline = stringResource(R.string.socks_port),
-            currentValue = settingsState.socksPort.value,
-            onValueConfirmed = { newValue -> mainViewModel.updateSocksPort(newValue) },
-            label = stringResource(R.string.socks_port),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            isError = !settingsState.socksPort.isValid,
-            errorMessage = settingsState.socksPort.error,
-            enabled = !vpnDisabled,
-            sheetState = sheetState,
-            scope = scope
-        )
-
-        EditableListItemWithBottomSheet(
             headline = stringResource(R.string.hev_socks5_tunnel_config_title),
             currentValue = settingsState.hevSocks5TunnelConfig.value,
             supportingValue = hevSocks5TunnelConfigPreview,
@@ -520,6 +507,18 @@ fun SettingsScreen(
         )
 
         PreferenceCategoryTitle(stringResource(R.string.connectivity_test))
+
+        EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.connectivity_test_socks_server),
+            currentValue = settingsState.connectivityTestSocksServer.value,
+            onValueConfirmed = { newValue -> mainViewModel.updateConnectivityTestSocksServer(newValue) },
+            label = stringResource(R.string.connectivity_test_socks_server),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            isError = !settingsState.connectivityTestSocksServer.isValid,
+            errorMessage = settingsState.connectivityTestSocksServer.error,
+            sheetState = sheetState,
+            scope = scope
+        )
 
         EditableListItemWithBottomSheet(
             headline = stringResource(R.string.connectivity_test_target),
