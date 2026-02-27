@@ -55,7 +55,8 @@ class TProxyService : VpnService() {
         }
     }
 
-    private lateinit var logFileManager: LogFileManager
+    private lateinit var xrayLogFileManager: LogFileManager
+    private lateinit var hevLogFileManager: LogFileManager
 
     @Volatile
     private var xrayProcess: Process? = null
@@ -66,7 +67,8 @@ class TProxyService : VpnService() {
 
     override fun onCreate() {
         super.onCreate()
-        logFileManager = LogFileManager(this)
+        xrayLogFileManager = LogFileManager(this, LogFileManager.DEFAULT_LOG_FILE_NAME)
+        hevLogFileManager = LogFileManager(this, LogFileManager.HEV_LOG_FILE_NAME)
         Log.d(TAG, "TProxyService created.")
     }
 
@@ -99,7 +101,8 @@ class TProxyService : VpnService() {
             }
 
             ACTION_START -> {
-                logFileManager.clearLogs()
+                xrayLogFileManager.clearLogs()
+                hevLogFileManager.clearLogs()
                 val prefs = Preferences(this)
                 if (prefs.disableVpn) {
                     serviceScope.launch { runXrayProcess() }
@@ -118,7 +121,8 @@ class TProxyService : VpnService() {
             }
 
             else -> {
-                logFileManager.clearLogs()
+                xrayLogFileManager.clearLogs()
+                hevLogFileManager.clearLogs()
                 startXray()
                 return START_STICKY
             }
@@ -179,7 +183,7 @@ class TProxyService : VpnService() {
             var line: String
             Log.d(TAG, "Reading xray process output.")
             while ((reader.readLine().also { line = it }) != null) {
-                logFileManager.appendLog(line)
+                xrayLogFileManager.appendLog(line)
                 synchronized(logBroadcastBuffer) {
                     logBroadcastBuffer.add(line)
                     if (!handler.hasCallbacks(broadcastLogsRunnable)) {
@@ -218,6 +222,31 @@ class TProxyService : VpnService() {
         processBuilder.directory(filesDir)
         processBuilder.redirectErrorStream(true)
         return processBuilder
+    }
+
+    private fun getTproxyConf(prefs: Preferences): String {
+        val hevLogFilePath = File(filesDir, LogFileManager.HEV_LOG_FILE_NAME).absolutePath
+        val configured = prefs.hevSocks5TunnelConfig
+            .replace(Preferences.HEV_LOG_FILE_PLACEHOLDER, hevLogFilePath)
+            .trimEnd()
+
+        if (HEV_LOG_FILE_REGEX.containsMatchIn(configured)) {
+            return configured + "\n"
+        }
+
+        val patched = HEV_MISC_SECTION_REGEX.find(configured)?.let { match ->
+            val lineEnd = configured.indexOf('\n', match.range.last + 1)
+                .takeIf { it >= 0 }
+                ?.plus(1)
+                ?: configured.length
+            val miscLine = configured.substring(match.range.first, match.range.last + 1)
+            val miscIndent = miscLine.takeWhile { it == ' ' || it == '\t' }
+            configured.substring(0, lineEnd) +
+                    "$miscIndent  log-file: '$hevLogFilePath'\n" +
+                    configured.substring(lineEnd)
+        } ?: (configured + "\nmisc:\n  log-file: '$hevLogFilePath'")
+
+        return patched.trimEnd() + "\n"
     }
 
     private fun stopXray() {
@@ -351,6 +380,8 @@ class TProxyService : VpnService() {
         private const val BROADCAST_DELAY_MS: Long = 3000
         private const val IPV4_REGEX =
             "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        private val HEV_LOG_FILE_REGEX = Regex("(?m)^\\s*log-file\\s*:")
+        private val HEV_MISC_SECTION_REGEX = Regex("(?m)^\\s*misc\\s*:\\s*$")
         private val IPV4_PATTERN: Pattern = Pattern.compile(IPV4_REGEX)
 
         init {
@@ -421,8 +452,5 @@ class TProxyService : VpnService() {
             return parsedRoutes.takeIf { it.isNotEmpty() }
         }
 
-        private fun getTproxyConf(prefs: Preferences): String {
-            return prefs.hevSocks5TunnelConfig.trimEnd() + "\n"
-        }
     }
 }

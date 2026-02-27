@@ -18,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.simplexray.an.common.NAVIGATION_DEBOUNCE_DELAY
 import com.simplexray.an.common.ROUTE_CONFIG
+import com.simplexray.an.common.ROUTE_HEV_LOG
 import com.simplexray.an.common.ROUTE_LOG
 import com.simplexray.an.common.ROUTE_SETTINGS
 import com.simplexray.an.common.rememberMainScreenCallbacks
@@ -26,6 +27,7 @@ import com.simplexray.an.ui.navigation.BottomNavHost
 import com.simplexray.an.ui.scaffold.AppScaffold
 import com.simplexray.an.viewmodel.LogViewModel
 import com.simplexray.an.viewmodel.LogViewModelFactory
+import com.simplexray.an.viewmodel.LogSource
 import com.simplexray.an.viewmodel.MainViewModel
 import com.simplexray.an.viewmodel.MainViewUiEvent
 import kotlinx.coroutines.Dispatchers
@@ -43,13 +45,20 @@ fun MainScreen(
 
     val launchers = rememberMainScreenLaunchers(mainViewModel)
 
-    val logViewModel: LogViewModel = viewModel(
-        factory = LogViewModelFactory(mainViewModel.application)
+    val xrayLogViewModel: LogViewModel = viewModel(
+        key = "xray_log_view_model",
+        factory = LogViewModelFactory(mainViewModel.application, LogSource.XRAY)
+    )
+
+    val hevLogViewModel: LogViewModel = viewModel(
+        key = "hev_log_view_model",
+        factory = LogViewModelFactory(mainViewModel.application, LogSource.HEV)
     )
 
     val callbacks = rememberMainScreenCallbacks(
         mainViewModel = mainViewModel,
-        logViewModel = logViewModel,
+        xrayLogViewModel = xrayLogViewModel,
+        hevLogViewModel = hevLogViewModel,
         launchers = launchers,
         applicationContext = mainViewModel.application
     )
@@ -104,27 +113,30 @@ fun MainScreen(
         }
     }
 
-    val logListState = rememberLazyListState()
+    val xrayLogListState = rememberLazyListState()
+    val hevLogListState = rememberLazyListState()
     val configListState = rememberLazyListState()
     val settingsScrollState = rememberScrollState()
 
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val mainScreenRoutes = listOf(ROUTE_CONFIG, ROUTE_LOG, ROUTE_SETTINGS)
+    val mainScreenRoutes = listOf(ROUTE_CONFIG, ROUTE_LOG, ROUTE_HEV_LOG, ROUTE_SETTINGS)
 
     if (currentRoute in mainScreenRoutes) {
         AppScaffold(
             navController = bottomNavController,
             snackbarHostState = snackbarHostState,
             mainViewModel = mainViewModel,
-            logViewModel = logViewModel,
+            xrayLogViewModel = xrayLogViewModel,
+            hevLogViewModel = hevLogViewModel,
             onCreateNewConfigFileAndEdit = callbacks.onCreateNewConfigFileAndEdit,
             onPerformExport = callbacks.onPerformExport,
             onPerformBackup = callbacks.onPerformBackup,
             onPerformRestore = callbacks.onPerformRestore,
             onSwitchVpnService = callbacks.onSwitchVpnService,
-            logListState = logListState,
+            xrayLogListState = xrayLogListState,
+            hevLogListState = hevLogListState,
             configListState = configListState,
             settingsScrollState = settingsScrollState
         ) { paddingValues ->
@@ -133,10 +145,12 @@ fun MainScreen(
                 paddingValues = paddingValues,
                 mainViewModel = mainViewModel,
                 onDeleteConfigClick = callbacks.onDeleteConfigClick,
-                logViewModel = logViewModel,
+                xrayLogViewModel = xrayLogViewModel,
+                hevLogViewModel = hevLogViewModel,
                 geoipFilePickerLauncher = launchers.geoipFilePickerLauncher,
                 geositeFilePickerLauncher = launchers.geositeFilePickerLauncher,
-                logListState = logListState,
+                xrayLogListState = xrayLogListState,
+                hevLogListState = hevLogListState,
                 configListState = configListState,
                 settingsScrollState = settingsScrollState
             )
@@ -147,10 +161,12 @@ fun MainScreen(
             paddingValues = androidx.compose.foundation.layout.PaddingValues(),
             mainViewModel = mainViewModel,
             onDeleteConfigClick = callbacks.onDeleteConfigClick,
-            logViewModel = logViewModel,
+            xrayLogViewModel = xrayLogViewModel,
+            hevLogViewModel = hevLogViewModel,
             geoipFilePickerLauncher = launchers.geoipFilePickerLauncher,
             geositeFilePickerLauncher = launchers.geositeFilePickerLauncher,
-            logListState = logListState,
+            xrayLogListState = xrayLogListState,
+            hevLogListState = hevLogListState,
             configListState = configListState,
             settingsScrollState = settingsScrollState
         )

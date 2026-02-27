@@ -43,6 +43,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.simplexray.an.R
 import com.simplexray.an.common.ROUTE_CONFIG
+import com.simplexray.an.common.ROUTE_HEV_LOG
 import com.simplexray.an.common.ROUTE_LOG
 import com.simplexray.an.common.ROUTE_SETTINGS
 import com.simplexray.an.viewmodel.LogViewModel
@@ -53,13 +54,15 @@ fun AppScaffold(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState,
     mainViewModel: MainViewModel,
-    logViewModel: LogViewModel,
+    xrayLogViewModel: LogViewModel,
+    hevLogViewModel: LogViewModel,
     onCreateNewConfigFileAndEdit: () -> Unit,
-    onPerformExport: () -> Unit,
+    onPerformExport: (LogViewModel) -> Unit,
     onPerformBackup: () -> Unit,
     onPerformRestore: () -> Unit,
     onSwitchVpnService: () -> Unit,
-    logListState: LazyListState,
+    xrayLogListState: LazyListState,
+    hevLogListState: LazyListState,
     configListState: LazyListState,
     settingsScrollState: androidx.compose.foundation.ScrollState,
     content: @Composable (paddingValues: androidx.compose.foundation.layout.PaddingValues) -> Unit
@@ -67,7 +70,17 @@ fun AppScaffold(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     var isLogSearching by remember { mutableStateOf(false) }
-    val logSearchQuery by logViewModel.searchQuery.collectAsState()
+    val xrayLogSearchQuery by xrayLogViewModel.searchQuery.collectAsState()
+    val hevLogSearchQuery by hevLogViewModel.searchQuery.collectAsState()
+    val activeLogViewModel = when (currentRoute) {
+        ROUTE_LOG -> xrayLogViewModel
+        ROUTE_HEV_LOG -> hevLogViewModel
+        else -> null
+    }
+    val logSearchQuery = when (currentRoute) {
+        ROUTE_HEV_LOG -> hevLogSearchQuery
+        else -> xrayLogSearchQuery
+    }
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(isLogSearching) {
@@ -89,14 +102,17 @@ fun AppScaffold(
                 onSwitchVpnService,
                 mainViewModel.controlMenuClickable.collectAsState().value,
                 mainViewModel.isServiceEnabled.collectAsState().value,
-                logViewModel,
-                logListState = logListState,
+                activeLogViewModel = activeLogViewModel,
+                xrayLogListState = xrayLogListState,
+                hevLogListState = hevLogListState,
                 configListState = configListState,
                 settingsScrollState = settingsScrollState,
                 isLogSearching = isLogSearching,
                 onLogSearchingChange = { isLogSearching = it },
                 logSearchQuery = logSearchQuery,
-                onLogSearchQueryChange = { logViewModel.onSearchQueryChange(it) },
+                onLogSearchQueryChange = { query ->
+                    activeLogViewModel?.onSearchQueryChange(query)
+                },
                 focusRequester = focusRequester,
                 mainViewModel = mainViewModel
             )
@@ -115,14 +131,15 @@ fun AppScaffold(
 fun AppTopAppBar(
     currentRoute: String?,
     onCreateNewConfigFileAndEdit: () -> Unit,
-    onPerformExport: () -> Unit,
+    onPerformExport: (LogViewModel) -> Unit,
     onPerformBackup: () -> Unit,
     onPerformRestore: () -> Unit,
     onSwitchVpnService: () -> Unit,
     controlMenuClickable: Boolean,
     isServiceEnabled: Boolean,
-    logViewModel: LogViewModel,
-    logListState: LazyListState,
+    activeLogViewModel: LogViewModel?,
+    xrayLogListState: LazyListState,
+    hevLogListState: LazyListState,
     configListState: LazyListState,
     settingsScrollState: androidx.compose.foundation.ScrollState,
     isLogSearching: Boolean = false,
@@ -132,10 +149,13 @@ fun AppTopAppBar(
     focusRequester: FocusRequester = FocusRequester(),
     mainViewModel: MainViewModel
 ) {
+    val isLogRoute = currentRoute == ROUTE_LOG || currentRoute == ROUTE_HEV_LOG
+
     val title = when (currentRoute) {
-        "config" -> stringResource(R.string.configuration)
-        "log" -> stringResource(R.string.log)
-        "settings" -> stringResource(R.string.settings)
+        ROUTE_CONFIG -> stringResource(R.string.configuration)
+        ROUTE_LOG -> stringResource(R.string.log)
+        ROUTE_HEV_LOG -> stringResource(R.string.hev_log)
+        ROUTE_SETTINGS -> stringResource(R.string.settings)
         else -> stringResource(R.string.app_name)
     }
 
@@ -143,15 +163,17 @@ fun AppTopAppBar(
 
     val showScrolledColor by remember(
         currentRoute,
-        logListState,
+        xrayLogListState,
+        hevLogListState,
         configListState,
         settingsScrollState
     ) {
         derivedStateOf {
             when (currentRoute) {
-                "log" -> logListState.firstVisibleItemIndex > 0 || logListState.firstVisibleItemScrollOffset > 0
-                "config" -> configListState.firstVisibleItemIndex > 0 || configListState.firstVisibleItemScrollOffset > 0
-                "settings" -> settingsScrollState.value > 0
+                ROUTE_LOG -> xrayLogListState.firstVisibleItemIndex > 0 || xrayLogListState.firstVisibleItemScrollOffset > 0
+                ROUTE_HEV_LOG -> hevLogListState.firstVisibleItemIndex > 0 || hevLogListState.firstVisibleItemScrollOffset > 0
+                ROUTE_CONFIG -> configListState.firstVisibleItemIndex > 0 || configListState.firstVisibleItemScrollOffset > 0
+                ROUTE_SETTINGS -> settingsScrollState.value > 0
                 else -> false
             }
         }
@@ -171,7 +193,7 @@ fun AppTopAppBar(
 
     TopAppBar(
         title = {
-            if (currentRoute == "log" && isLogSearching) {
+            if (isLogRoute && isLogSearching) {
                 TextField(
                     value = logSearchQuery,
                     onValueChange = onLogSearchQueryChange,
@@ -194,7 +216,7 @@ fun AppTopAppBar(
             }
         },
         navigationIcon = {
-            if (currentRoute == "log" && isLogSearching) {
+            if (isLogRoute && isLogSearching) {
                 IconButton(onClick = {
                     onLogSearchingChange(false)
                     onLogSearchQueryChange("")
@@ -207,7 +229,7 @@ fun AppTopAppBar(
             }
         },
         actions = {
-            if (currentRoute == "log" && isLogSearching) {
+            if (isLogRoute && isLogSearching) {
                 if (logSearchQuery.isNotEmpty()) {
                     IconButton(onClick = { onLogSearchQueryChange("") }) {
                         Icon(
@@ -226,7 +248,7 @@ fun AppTopAppBar(
                     onSwitchVpnService = onSwitchVpnService,
                     controlMenuClickable = controlMenuClickable,
                     isServiceEnabled = isServiceEnabled,
-                    logViewModel = logViewModel,
+                    activeLogViewModel = activeLogViewModel,
                     onLogSearchingChange = onLogSearchingChange,
                     mainViewModel = mainViewModel
                 )
@@ -240,18 +262,18 @@ fun AppTopAppBar(
 private fun TopAppBarActions(
     currentRoute: String?,
     onCreateNewConfigFileAndEdit: () -> Unit,
-    onPerformExport: () -> Unit,
+    onPerformExport: (LogViewModel) -> Unit,
     onPerformBackup: () -> Unit,
     onPerformRestore: () -> Unit,
     onSwitchVpnService: () -> Unit,
     controlMenuClickable: Boolean,
     isServiceEnabled: Boolean,
-    logViewModel: LogViewModel,
+    activeLogViewModel: LogViewModel?,
     onLogSearchingChange: (Boolean) -> Unit = {},
     mainViewModel: MainViewModel
 ) {
     when (currentRoute) {
-        "config" -> ConfigActions(
+        ROUTE_CONFIG -> ConfigActions(
             onCreateNewConfigFileAndEdit = onCreateNewConfigFileAndEdit,
             onSwitchVpnService = onSwitchVpnService,
             controlMenuClickable = controlMenuClickable,
@@ -259,13 +281,15 @@ private fun TopAppBarActions(
             mainViewModel = mainViewModel
         )
 
-        "log" -> LogActions(
-            onPerformExport = onPerformExport,
-            logViewModel = logViewModel,
-            onLogSearchingChange = onLogSearchingChange
-        )
+        ROUTE_LOG, ROUTE_HEV_LOG -> activeLogViewModel?.let { viewModel ->
+            LogActions(
+                onPerformExport = { onPerformExport(viewModel) },
+                logViewModel = viewModel,
+                onLogSearchingChange = onLogSearchingChange
+            )
+        }
 
-        "settings" -> SettingsActions(
+        ROUTE_SETTINGS -> SettingsActions(
             onPerformBackup = onPerformBackup,
             onPerformRestore = onPerformRestore
         )
@@ -424,6 +448,18 @@ fun AppBottomNavigationBar(navController: NavHostController) {
                 )
             },
             label = { Text(stringResource(R.string.log)) }
+        )
+        NavigationBarItem(
+            alwaysShowLabel = false,
+            selected = currentRoute == ROUTE_HEV_LOG,
+            onClick = { navigateToRoute(navController, ROUTE_HEV_LOG) },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.history),
+                    contentDescription = stringResource(R.string.hev_log)
+                )
+            },
+            label = { Text(stringResource(R.string.hev_log)) }
         )
         NavigationBarItem(
             alwaysShowLabel = false,

@@ -12,15 +12,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.simplexray.an.data.source.LogFileManager
-import com.simplexray.an.service.TProxyService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -31,10 +33,12 @@ import java.util.Collections
 private const val TAG = "LogViewModel"
 
 @OptIn(FlowPreview::class)
-class LogViewModel(application: Application) :
-    AndroidViewModel(application) {
+class LogViewModel(
+    application: Application,
+    private val logSource: LogSource = LogSource.XRAY
+) : AndroidViewModel(application) {
 
-    private val logFileManager = LogFileManager(application)
+    private val logFileManager = LogFileManager(application, logSource.fileName)
 
     private val _logEntries = MutableStateFlow<List<String>>(emptyList())
     val logEntries: StateFlow<List<String>> = _logEntries.asStateFlow()
@@ -54,28 +58,14 @@ class LogViewModel(application: Application) :
     private val logEntrySet: MutableSet<String> = Collections.synchronizedSet(HashSet())
     private val logMutex = Mutex()
 
-    private var logUpdateReceiver: BroadcastReceiver
+    private var logUpdateReceiver: BroadcastReceiver? = null
+    private var isReceiverRegistered = false
+    private var filePollingJob: Job? = null
+    private var lastKnownLogFileLength = -1L
 
     init {
+        initializeLogReceiver()
         Log.d(TAG, "LogViewModel initialized.")
-        logUpdateReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (TProxyService.ACTION_LOG_UPDATE == intent.action) {
-                    val newLogs = intent.getStringArrayListExtra(TProxyService.EXTRA_LOG_DATA)
-                    if (!newLogs.isNullOrEmpty()) {
-                        Log.d(TAG, "Received log update broadcast with ${newLogs.size} entries.")
-                        viewModelScope.launch {
-                            processNewLogs(newLogs)
-                        }
-                    } else {
-                        Log.w(
-                            TAG,
-                            "Received log update broadcast, but log data list is null or empty."
-                        )
-                    }
-                }
-            }
-        }
         viewModelScope.launch {
             logEntries.collect { entries ->
                 _hasLogsToExport.value = entries.isNotEmpty() && logFileManager.logFile.exists()
@@ -94,33 +84,89 @@ class LogViewModel(application: Application) :
         }
     }
 
-    fun registerLogReceiver(context: Context) {
-        val filter = IntentFilter(TProxyService.ACTION_LOG_UPDATE)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(logUpdateReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        } else {
-            @Suppress("UnspecifiedRegisterReceiverFlag")
-            context.registerReceiver(logUpdateReceiver, filter)
+    private fun initializeLogReceiver() {
+        val action = logSource.broadcastAction
+        val extraKey = logSource.broadcastExtraKey
+        if (action.isNullOrBlank() || extraKey.isNullOrBlank()) {
+            logUpdateReceiver = null
+            return
         }
-        Log.d(TAG, "Log receiver registered.")
+
+        logUpdateReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (action == intent.action) {
+                    val newLogs = intent.getStringArrayListExtra(extraKey)
+                    if (!newLogs.isNullOrEmpty()) {
+                        Log.d(TAG, "Received log update broadcast with ${newLogs.size} entries.")
+                        viewModelScope.launch {
+                            processNewLogs(newLogs)
+                        }
+                    } else {
+                        Log.w(
+                            TAG,
+                            "Received log update broadcast, but log data list is null or empty."
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun registerLogReceiver(context: Context) {
+        val action = logSource.broadcastAction
+        val receiver = logUpdateReceiver
+        if (!action.isNullOrBlank() && receiver != null && !isReceiverRegistered) {
+            val filter = IntentFilter(action)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                @Suppress("UnspecifiedRegisterReceiverFlag")
+                context.registerReceiver(receiver, filter)
+            }
+            isReceiverRegistered = true
+            Log.d(TAG, "Log receiver registered.")
+        }
+
+        startPollingIfNeeded()
     }
 
     fun unregisterLogReceiver(context: Context) {
-        context.unregisterReceiver(logUpdateReceiver)
-        Log.d(TAG, "Log receiver unregistered.")
+        val receiver = logUpdateReceiver
+        if (isReceiverRegistered && receiver != null) {
+            try {
+                context.unregisterReceiver(receiver)
+                Log.d(TAG, "Log receiver unregistered.")
+            } catch (e: IllegalArgumentException) {
+                Log.w(TAG, "Log receiver was not registered.", e)
+            } finally {
+                isReceiverRegistered = false
+            }
+        } else {
+            isReceiverRegistered = false
+        }
+        stopPolling()
     }
 
     fun loadLogs() {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.d(TAG, "Loading logs.")
-            val savedLogData = logFileManager.readLogs()
-            val initialLogs = if (!savedLogData.isNullOrEmpty()) {
-                savedLogData.split("\n").filter { it.trim().isNotEmpty() }
-            } else {
-                emptyList()
-            }
-            processInitialLogs(initialLogs)
+            loadLogsInternal()
         }
+    }
+
+    private suspend fun loadLogsInternal() {
+        Log.d(TAG, "Loading logs.")
+        val savedLogData = logFileManager.readLogs()
+        val initialLogs = if (!savedLogData.isNullOrEmpty()) {
+            savedLogData.split("\n").filter { it.trim().isNotEmpty() }
+        } else {
+            emptyList()
+        }
+        lastKnownLogFileLength = if (logFileManager.logFile.exists()) {
+            logFileManager.logFile.length()
+        } else {
+            0L
+        }
+        processInitialLogs(initialLogs)
     }
 
     private suspend fun processInitialLogs(initialLogs: List<String>) {
@@ -151,22 +197,57 @@ class LogViewModel(application: Application) :
                 _logEntries.value = emptyList()
                 logEntrySet.clear()
             }
+            lastKnownLogFileLength = -1L
             Log.d(TAG, "Logs cleared.")
         }
+    }
+
+    private fun startPollingIfNeeded() {
+        val interval = logSource.pollingIntervalMs
+        if (interval <= 0L || filePollingJob?.isActive == true) {
+            return
+        }
+
+        filePollingJob = viewModelScope.launch(Dispatchers.IO) {
+            while (isActive) {
+                val currentLogFileLength = if (logFileManager.logFile.exists()) {
+                    logFileManager.logFile.length()
+                } else {
+                    0L
+                }
+
+                if (currentLogFileLength != lastKnownLogFileLength) {
+                    loadLogsInternal()
+                }
+
+                delay(interval)
+            }
+        }
+    }
+
+    private fun stopPolling() {
+        filePollingJob?.cancel()
+        filePollingJob = null
     }
 
     fun getLogFile(): File {
         return logFileManager.logFile
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        stopPolling()
+    }
 }
 
 class LogViewModelFactory(
-    private val application: Application
+    private val application: Application,
+    private val source: LogSource = LogSource.XRAY
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LogViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return LogViewModel(application) as T
+            return LogViewModel(application, source) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -299,6 +299,7 @@ class Preferences(context: Context) {
         const val GEOSITE_URL: String = "GeositeUrl"
         const val BYPASS_SELECTED_APPS: String = "BypassSelectedApps"
         const val THEME: String = "Theme"
+        const val HEV_LOG_FILE_PLACEHOLDER: String = "__HEV_LOG_FILE__"
         val DEFAULT_HEV_SOCKS5_TUNNEL_CONFIG: String = """
             tunnel:
               mtu: 65535
@@ -309,6 +310,7 @@ class Preferences(context: Context) {
               udp: 'udp'
               pipeline: true
             misc:
+              log-file: '__HEV_LOG_FILE__'
               log-level: error
         """.trimIndent()
         private const val TAG = "Preferences"

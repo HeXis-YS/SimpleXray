@@ -9,6 +9,7 @@
     <string name="save">保存</string>
     <string name="search">搜索</string>
     <string name="log">日志</string>
+    <string name="hev_log">Hev 日志</string>
     <string name="config">编辑配置</string>
     <string name="settings">设置</string>
     <string name="about">关于</string>

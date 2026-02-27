@@ -2,6 +2,7 @@ package com.simplexray.an.common
 
 const val ROUTE_CONFIG = "config"
 const val ROUTE_LOG = "log"
+const val ROUTE_HEV_LOG = "hev_log"
 const val ROUTE_SETTINGS = "settings"
 const val ROUTE_MAIN = "main"
 const val ROUTE_APP_LIST = "app_list"

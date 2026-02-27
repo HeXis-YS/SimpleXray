@@ -43,7 +43,7 @@ fun LogScreen(
     val filteredEntries by logViewModel.filteredEntries.collectAsStateWithLifecycle()
     val isInitialLoad = remember { mutableStateOf(true) }
 
-    DisposableEffect(key1 = Unit) {
+    DisposableEffect(logViewModel) {
         logViewModel.registerLogReceiver(context)
         logViewModel.loadLogs()
         onDispose {

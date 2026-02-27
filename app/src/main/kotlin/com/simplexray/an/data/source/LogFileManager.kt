@@ -11,12 +11,15 @@ import java.io.IOException
 import java.io.PrintWriter
 import java.io.RandomAccessFile
 
-class LogFileManager(context: Context) {
+class LogFileManager(
+    context: Context,
+    private val fileName: String = DEFAULT_LOG_FILE_NAME
+) {
     val logFile: File
 
     init {
         val filesDir = context.filesDir
-        this.logFile = File(filesDir, LOG_FILE_NAME)
+        this.logFile = File(filesDir, fileName)
         Log.d(TAG, "Log file path: " + logFile.absolutePath)
     }
 
@@ -106,7 +109,7 @@ class LogFileManager(context: Context) {
                     return
                 }
                 raf.channel.use { sourceChannel ->
-                    val tempLogFile = File(logFile.parentFile, "$LOG_FILE_NAME.tmp")
+                    val tempLogFile = File(logFile.parentFile, "$fileName.tmp")
                     FileOutputStream(tempLogFile).use { fos ->
                         fos.channel.use { destChannel ->
                             val bytesToTransfer = sourceChannel.size() - firstLineToKeepStartPos
@@ -144,7 +147,8 @@ class LogFileManager(context: Context) {
 
     companion object {
         private const val TAG = "LogFileManager"
-        private const val LOG_FILE_NAME = "app_log.txt"
+        const val DEFAULT_LOG_FILE_NAME = "app_log.txt"
+        const val HEV_LOG_FILE_NAME = "hev_socks5_tunnel.log"
         private const val MAX_LOG_SIZE_BYTES = (10 * 1024 * 1024).toLong()
         private const val TRUNCATE_SIZE_BYTES = (5 * 1024 * 1024).toLong()
     }

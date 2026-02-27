@@ -15,7 +15,7 @@ import java.io.File
 
 data class MainScreenCallbacks(
     val onCreateNewConfigFileAndEdit: () -> Unit,
-    val onPerformExport: () -> Unit,
+    val onPerformExport: (LogViewModel) -> Unit,
     val onPerformBackup: () -> Unit,
     val onPerformRestore: () -> Unit,
     val onDeleteConfigClick: (File, () -> Unit) -> Unit,
@@ -25,7 +25,8 @@ data class MainScreenCallbacks(
 @Composable
 fun rememberMainScreenCallbacks(
     mainViewModel: MainViewModel,
-    logViewModel: LogViewModel,
+    xrayLogViewModel: LogViewModel,
+    hevLogViewModel: LogViewModel,
     launchers: MainScreenLaunchers,
     applicationContext: Context
 ): MainScreenCallbacks {
@@ -40,7 +41,7 @@ fun rememberMainScreenCallbacks(
         }
     }
 
-    val onPerformExport: () -> Unit = {
+    val onPerformExport: (LogViewModel) -> Unit = { logViewModel ->
         scope.launch {
             val logFile = logViewModel.getLogFile()
             if (logFile.exists() && logViewModel.logEntries.value.isNotEmpty()) {
@@ -97,7 +98,8 @@ fun rememberMainScreenCallbacks(
     }
 
     val onSwitchVpnService: () -> Unit = {
-        logViewModel.clearLogs()
+        xrayLogViewModel.clearLogs()
+        hevLogViewModel.clearLogs()
         if (mainViewModel.isServiceEnabled.value) {
             mainViewModel.stopTProxyService()
         } else {

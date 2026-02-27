@@ -20,6 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.simplexray.an.common.ROUTE_CONFIG
+import com.simplexray.an.common.ROUTE_HEV_LOG
 import com.simplexray.an.common.ROUTE_LOG
 import com.simplexray.an.common.ROUTE_SETTINGS
 import com.simplexray.an.service.TProxyService
@@ -35,7 +36,8 @@ private const val TAG = "AppNavGraph"
 private val BOTTOM_NAV_ROUTE_INDEX = mapOf(
     ROUTE_CONFIG to 0,
     ROUTE_LOG to 1,
-    ROUTE_SETTINGS to 2
+    ROUTE_HEV_LOG to 2,
+    ROUTE_SETTINGS to 3
 )
 
 private fun NavBackStackEntry.routeIndex(): Int =
@@ -97,10 +99,12 @@ fun BottomNavHost(
     paddingValues: PaddingValues,
     mainViewModel: MainViewModel,
     onDeleteConfigClick: (File, () -> Unit) -> Unit,
-    logViewModel: LogViewModel,
+    xrayLogViewModel: LogViewModel,
+    hevLogViewModel: LogViewModel,
     geoipFilePickerLauncher: ActivityResultLauncher<Array<String>>,
     geositeFilePickerLauncher: ActivityResultLauncher<Array<String>>,
-    logListState: LazyListState,
+    xrayLogListState: LazyListState,
+    hevLogListState: LazyListState,
     configListState: LazyListState,
     settingsScrollState: ScrollState
 ) {
@@ -133,8 +137,21 @@ fun BottomNavHost(
             popExitTransition = { popExitTransition() }
         ) {
             LogScreen(
-                logViewModel = logViewModel,
-                listState = logListState
+                logViewModel = xrayLogViewModel,
+                listState = xrayLogListState
+            )
+        }
+
+        composable(
+            route = ROUTE_HEV_LOG,
+            enterTransition = { enterTransition() },
+            exitTransition = { exitTransition() },
+            popEnterTransition = { popEnterTransition() },
+            popExitTransition = { popExitTransition() }
+        ) {
+            LogScreen(
+                logViewModel = hevLogViewModel,
+                listState = hevLogListState
             )
         }
 
