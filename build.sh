@@ -17,8 +17,7 @@ export PATH="$(pwd)/go/bin:$PATH"
 git submodule update --init --recursive
 
 # Clone Xray-core
-XRAY_TAG=$(curl -fsSL "https://api.github.com/repos/XTLS/Xray-core/releases/latest" | jq -r ".tag_name")
-git clone -b $XRAY_TAG --depth 1 --single-branch https://github.com/XTLS/Xray-core
+git clone --depth 1 --single-branch https://github.com/HeXis-YS/Xray-core
 pushd Xray-core
 COMMID=$(git rev-parse HEAD | cut -c 1-7)
 GCFLAGS="-l=4 -B"
