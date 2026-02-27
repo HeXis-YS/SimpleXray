@@ -72,6 +72,12 @@ fun SettingsScreen(
     val geositeProgress by mainViewModel.geositeDownloadProgress.collectAsStateWithLifecycle()
 
     val vpnDisabled = settingsState.switches.disableVpn
+    val hevSocks5TunnelConfigPreview = settingsState.hevSocks5TunnelConfig.value
+        .lineSequence()
+        .firstOrNull { it.isNotBlank() }
+        ?.trim()
+        ?.take(80)
+        ?: stringResource(R.string.hev_socks5_tunnel_config_empty)
 
     var showGeoipDeleteDialog by remember { mutableStateOf(false) }
     var showGeositeDeleteDialog by remember { mutableStateOf(false) }
@@ -342,6 +348,20 @@ fun SettingsScreen(
         )
 
         EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.hev_socks5_tunnel_config_title),
+            currentValue = settingsState.hevSocks5TunnelConfig.value,
+            supportingValue = hevSocks5TunnelConfigPreview,
+            onValueConfirmed = { newValue -> mainViewModel.updateHevSocks5TunnelConfig(newValue) },
+            label = stringResource(R.string.hev_socks5_tunnel_config_title),
+            isError = !settingsState.hevSocks5TunnelConfig.isValid,
+            errorMessage = settingsState.hevSocks5TunnelConfig.error,
+            minLines = 8,
+            maxLines = 16,
+            sheetState = sheetState,
+            scope = scope
+        )
+
+        EditableListItemWithBottomSheet(
             headline = stringResource(R.string.dns_ipv4),
             currentValue = settingsState.dnsIpv4.value,
             onValueConfirmed = { newValue -> mainViewModel.updateDnsIpv4(newValue) },
@@ -541,12 +561,15 @@ fun SettingsScreen(
 fun EditableListItemWithBottomSheet(
     headline: String,
     currentValue: String,
+    supportingValue: String = currentValue,
     onValueConfirmed: (String) -> Unit,
     label: String,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     isError: Boolean = false,
     errorMessage: String? = null,
     enabled: Boolean = true,
+    minLines: Int = 1,
+    maxLines: Int = 1,
     sheetState: SheetState,
     scope: CoroutineScope
 ) {
@@ -569,6 +592,8 @@ fun EditableListItemWithBottomSheet(
                     label = { Text(label) },
                     keyboardOptions = keyboardOptions,
                     isError = isError,
+                    minLines = minLines,
+                    maxLines = maxLines,
                     supportingText = {
                         if (isError) {
                             Text(text = errorMessage ?: "")
@@ -614,7 +639,7 @@ fun EditableListItemWithBottomSheet(
 
     ListItem(
         headlineContent = { Text(headline) },
-        supportingContent = { Text(currentValue) },
+        supportingContent = { Text(supportingValue) },
         modifier = Modifier.clickable(enabled = enabled) {
             tempValue = currentValue
             showSheet = true

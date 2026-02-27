@@ -112,12 +112,6 @@ class Preferences(context: Context) {
             setValueInProvider(SOCKS_PORT, port.toString())
         }
 
-    val socksUsername: String
-        get() = getPrefData(SOCKS_USER).first ?: ""
-
-    val socksPassword: String
-        get() = getPrefData(SOCKS_PASS).first ?: ""
-
     var dnsIpv4: String
         get() = getPrefData(DNS_IPV4).first ?: "1.1.1.1"
         set(addr) {
@@ -129,9 +123,6 @@ class Preferences(context: Context) {
         set(addr) {
             setValueInProvider(DNS_IPV6, addr)
         }
-
-    val udpInTcp: Boolean
-        get() = getBooleanPref(UDP_IN_TCP, false)
 
     var ipv4: Boolean
         get() = getBooleanPref(IPV4, true)
@@ -181,6 +172,14 @@ class Preferences(context: Context) {
             setValueInProvider(DISABLE_VPN, value)
         }
 
+    var hevSocks5TunnelConfig: String
+        get() = getPrefData(HEV_SOCKS5_TUNNEL_CONFIG).first
+            ?.takeIf { it.isNotBlank() }
+            ?: DEFAULT_HEV_SOCKS5_TUNNEL_CONFIG
+        set(value) {
+            setValueInProvider(HEV_SOCKS5_TUNNEL_CONFIG, value)
+        }
+
     val tunnelMtu: Int
         get() = 65535
 
@@ -195,15 +194,6 @@ class Preferences(context: Context) {
 
     val tunnelIpv6Prefix: Int
         get() = 128
-
-    val logLevel: String
-        get() = "error"
-
-    val multiQueue: Boolean
-        get() = true
-
-    val pipeline: Boolean
-        get() = true
 
     var selectedConfigPath: String?
         get() = getPrefData(SELECTED_CONFIG_PATH).first
@@ -287,14 +277,11 @@ class Preferences(context: Context) {
     companion object {
         const val SOCKS_ADDR: String = "SocksAddr"
         const val SOCKS_PORT: String = "SocksPort"
-        const val SOCKS_USER: String = "SocksUser"
-        const val SOCKS_PASS: String = "SocksPass"
         const val DNS_IPV4: String = "DnsIpv4"
         const val DNS_IPV6: String = "DnsIpv6"
         const val IPV4: String = "Ipv4"
         const val IPV6: String = "Ipv6"
         const val GLOBAL: String = "Global"
-        const val UDP_IN_TCP: String = "UdpInTcp"
         const val APPS: String = "Apps"
         const val ENABLE: String = "Enable"
         const val SELECTED_CONFIG_PATH: String = "SelectedConfigPath"
@@ -303,12 +290,25 @@ class Preferences(context: Context) {
         const val CUSTOM_GEOSITE_IMPORTED: String = "CustomGeositeImported"
         const val CONFIG_FILES_ORDER: String = "ConfigFilesOrder"
         const val DISABLE_VPN: String = "DisableVpn"
+        const val HEV_SOCKS5_TUNNEL_CONFIG: String = "HevSocks5TunnelConfig"
         const val CONNECTIVITY_TEST_TARGET: String = "ConnectivityTestTarget"
         const val CONNECTIVITY_TEST_TIMEOUT: String = "ConnectivityTestTimeout"
         const val GEOIP_URL: String = "GeoipUrl"
         const val GEOSITE_URL: String = "GeositeUrl"
         const val BYPASS_SELECTED_APPS: String = "BypassSelectedApps"
         const val THEME: String = "Theme"
+        val DEFAULT_HEV_SOCKS5_TUNNEL_CONFIG: String = """
+            tunnel:
+              mtu: 65535
+              multi-queue: true
+            socks5:
+              port: 10809
+              address: '::1'
+              udp: 'udp'
+              pipeline: true
+            misc:
+              log-level: error
+        """.trimIndent()
         private const val TAG = "Preferences"
     }
 }

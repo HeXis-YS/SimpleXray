@@ -107,6 +107,7 @@ class FileManager(private val application: Application, private val prefs: Prefe
                 preferencesMap[Preferences.GEOIP_URL] = prefs.geoipUrl
                 preferencesMap[Preferences.GEOSITE_URL] = prefs.geositeUrl
                 preferencesMap[Preferences.BYPASS_SELECTED_APPS] = prefs.bypassSelectedApps
+                preferencesMap[Preferences.HEV_SOCKS5_TUNNEL_CONFIG] = prefs.hevSocks5TunnelConfig
                 val configFilesMap: MutableMap<String, String> = mutableMapOf()
                 val filesDir = application.filesDir
                 val files = filesDir.listFiles()
@@ -301,6 +302,11 @@ class FileManager(private val application: Application, private val prefs: Prefe
                     value = preferencesMap[Preferences.BYPASS_SELECTED_APPS]
                     if (value is Boolean) {
                         prefs.bypassSelectedApps = value
+                    }
+
+                    value = preferencesMap[Preferences.HEV_SOCKS5_TUNNEL_CONFIG]
+                    if (value is String) {
+                        prefs.hevSocks5TunnelConfig = value
                     }
 
                     val configOrderObj = preferencesMap[Preferences.CONFIG_FILES_ORDER]

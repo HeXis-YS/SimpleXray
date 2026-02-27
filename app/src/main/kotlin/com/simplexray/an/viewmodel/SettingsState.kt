@@ -31,6 +31,7 @@ data class FileStates(
 
 data class SettingsState(
     val socksPort: InputFieldState,
+    val hevSocks5TunnelConfig: InputFieldState,
     val dnsIpv4: InputFieldState,
     val dnsIpv6: InputFieldState,
     val switches: SwitchStates,
@@ -38,4 +39,4 @@ data class SettingsState(
     val files: FileStates,
     val connectivityTestTarget: InputFieldState,
     val connectivityTestTimeout: InputFieldState
-) 
+)

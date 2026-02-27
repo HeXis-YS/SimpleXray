@@ -81,6 +81,7 @@ class MainViewModel(application: Application) :
     private val _settingsState = MutableStateFlow(
         SettingsState(
             socksPort = InputFieldState(prefs.socksPort.toString()),
+            hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
             dnsIpv4 = InputFieldState(prefs.dnsIpv4),
             dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
@@ -160,6 +161,7 @@ class MainViewModel(application: Application) :
     private fun updateSettingsState() {
         _settingsState.value = _settingsState.value.copy(
             socksPort = InputFieldState(prefs.socksPort.toString()),
+            hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
             dnsIpv4 = InputFieldState(prefs.dnsIpv4),
             dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
@@ -397,6 +399,25 @@ class MainViewModel(application: Application) :
         _settingsState.value = _settingsState.value.copy(
             switches = _settingsState.value.switches.copy(disableVpn = enabled)
         )
+    }
+
+    fun updateHevSocks5TunnelConfig(config: String): Boolean {
+        if (config.isBlank()) {
+            _settingsState.value = _settingsState.value.copy(
+                hevSocks5TunnelConfig = InputFieldState(
+                    value = config,
+                    error = application.getString(R.string.invalid_hev_socks5_tunnel_config),
+                    isValid = false
+                )
+            )
+            return false
+        }
+
+        prefs.hevSocks5TunnelConfig = config
+        _settingsState.value = _settingsState.value.copy(
+            hevSocks5TunnelConfig = InputFieldState(config)
+        )
+        return true
     }
 
     fun setTheme(mode: ThemeMode) {
@@ -930,4 +951,3 @@ class MainViewModelFactory(
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
-

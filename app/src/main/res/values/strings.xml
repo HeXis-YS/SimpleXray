@@ -105,4 +105,7 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="auto">Auto</string>
+    <string name="hev_socks5_tunnel_config_title">hev-socks5-tunnel config</string>
+    <string name="hev_socks5_tunnel_config_empty">Tap to edit custom YAML</string>
+    <string name="invalid_hev_socks5_tunnel_config">Configuration cannot be empty</string>
 </resources>

@@ -510,23 +510,7 @@ class TProxyService : VpnService() {
         }
 
         private fun getTproxyConf(prefs: Preferences): String {
-            var tproxyConf = """misc:
-  log-level: ${prefs.logLevel}
-tunnel:
-  mtu: ${prefs.tunnelMtu}
-  multi-queue: ${if (prefs.multiQueue) "true" else "false"}
-"""
-            tproxyConf += """socks5:
-  port: ${prefs.socksPort}
-  address: '${prefs.socksAddress}'
-  udp: '${if (prefs.udpInTcp) "tcp" else "udp"}'
-  pipeline: ${if (prefs.pipeline) "true" else "false"}
-"""
-            if (prefs.socksUsername.isNotEmpty() && prefs.socksPassword.isNotEmpty()) {
-                tproxyConf += "  username: '" + prefs.socksUsername + "'\n"
-                tproxyConf += "  password: '" + prefs.socksPassword + "'\n"
-            }
-            return tproxyConf
+            return prefs.hevSocks5TunnelConfig.trimEnd() + "\n"
         }
     }
 }
