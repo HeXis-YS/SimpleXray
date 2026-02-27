@@ -54,6 +54,15 @@ class Preferences(context: Context) {
         return default
     }
 
+    private fun getNonBlankStringPref(key: String, defaultValue: String): String {
+        val value = getPrefData(key).first
+        if (value.isNullOrBlank()) {
+            setValueInProvider(key, defaultValue)
+            return defaultValue
+        }
+        return value
+    }
+
     private fun setValueInProvider(key: String, value: Any?) {
         val uri = PrefsContract.PrefsEntry.CONTENT_URI.buildUpon().appendPath(key).build()
         val values = ContentValues()
@@ -103,23 +112,27 @@ class Preferences(context: Context) {
         get() {
             val value = getPrefData(SOCKS_PORT).first
             val port = value?.toIntOrNull()
-            if (value != null && port == null) {
+            if (port != null && port in 1025..65535) {
+                return port
+            }
+            if (!value.isNullOrEmpty()) {
                 Log.e(TAG, "Failed to parse SocksPort as Integer: $value")
             }
-            return port ?: 10809
+            setValueInProvider(SOCKS_PORT, DEFAULT_SOCKS_PORT.toString())
+            return DEFAULT_SOCKS_PORT
         }
         set(port) {
             setValueInProvider(SOCKS_PORT, port.toString())
         }
 
     var dnsIpv4: String
-        get() = getPrefData(DNS_IPV4).first ?: "1.1.1.1"
+        get() = getNonBlankStringPref(DNS_IPV4, DEFAULT_DNS_IPV4)
         set(addr) {
             setValueInProvider(DNS_IPV4, addr)
         }
 
     var dnsIpv6: String
-        get() = getPrefData(DNS_IPV6).first ?: "2606:4700:4700::1111"
+        get() = getNonBlankStringPref(DNS_IPV6, DEFAULT_DNS_IPV6)
         set(addr) {
             setValueInProvider(DNS_IPV6, addr)
         }
@@ -173,17 +186,16 @@ class Preferences(context: Context) {
         }
 
     var tunRoutes: String
-        get() = getPrefData(TUN_ROUTES).first
-            ?.takeIf { it.isNotBlank() }
-            ?: context1.resources.getStringArray(R.array.default_tun_routes).joinToString("\n")
+        get() = getNonBlankStringPref(
+            TUN_ROUTES,
+            context1.resources.getStringArray(R.array.default_tun_routes).joinToString("\n")
+        )
         set(value) {
             setValueInProvider(TUN_ROUTES, value)
         }
 
     var hevSocks5TunnelConfig: String
-        get() = getPrefData(HEV_SOCKS5_TUNNEL_CONFIG).first
-            ?.takeIf { it.isNotBlank() }
-            ?: DEFAULT_HEV_SOCKS5_TUNNEL_CONFIG
+        get() = getNonBlankStringPref(HEV_SOCKS5_TUNNEL_CONFIG, DEFAULT_HEV_SOCKS5_TUNNEL_CONFIG)
         set(value) {
             setValueInProvider(HEV_SOCKS5_TUNNEL_CONFIG, value)
         }
@@ -240,26 +252,35 @@ class Preferences(context: Context) {
         }
 
     var connectivityTestTarget: String
-        get() = getPrefData(CONNECTIVITY_TEST_TARGET).first
-            ?: context1.getString(R.string.connectivity_test_url)
+        get() = getNonBlankStringPref(
+            CONNECTIVITY_TEST_TARGET,
+            context1.getString(R.string.connectivity_test_url)
+        )
         set(value) {
             setValueInProvider(CONNECTIVITY_TEST_TARGET, value)
         }
 
     var connectivityTestTimeout: Int
-        get() = getPrefData(CONNECTIVITY_TEST_TIMEOUT).first?.toIntOrNull() ?: 3000
+        get() {
+            val timeout = getPrefData(CONNECTIVITY_TEST_TIMEOUT).first?.toIntOrNull()
+            if (timeout != null && timeout > 0) {
+                return timeout
+            }
+            setValueInProvider(CONNECTIVITY_TEST_TIMEOUT, DEFAULT_CONNECTIVITY_TEST_TIMEOUT.toString())
+            return DEFAULT_CONNECTIVITY_TEST_TIMEOUT
+        }
         set(value) {
             setValueInProvider(CONNECTIVITY_TEST_TIMEOUT, value.toString())
         }
 
     var geoipUrl: String
-        get() = getPrefData(GEOIP_URL).first ?: context1.getString(R.string.geoip_url)
+        get() = getNonBlankStringPref(GEOIP_URL, context1.getString(R.string.geoip_url))
         set(value) {
             setValueInProvider(GEOIP_URL, value)
         }
 
     var geositeUrl: String
-        get() = getPrefData(GEOSITE_URL).first ?: context1.getString(R.string.geosite_url)
+        get() = getNonBlankStringPref(GEOSITE_URL, context1.getString(R.string.geosite_url))
         set(value) {
             setValueInProvider(GEOSITE_URL, value)
         }
@@ -277,6 +298,10 @@ class Preferences(context: Context) {
         }
 
     companion object {
+        const val DEFAULT_SOCKS_PORT: Int = 10809
+        const val DEFAULT_DNS_IPV4: String = "1.1.1.1"
+        const val DEFAULT_DNS_IPV6: String = "2606:4700:4700::1111"
+        const val DEFAULT_CONNECTIVITY_TEST_TIMEOUT: Int = 3000
         const val SOCKS_ADDR: String = "SocksAddr"
         const val SOCKS_PORT: String = "SocksPort"
         const val DNS_IPV4: String = "DnsIpv4"

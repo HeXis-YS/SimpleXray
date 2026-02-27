@@ -310,18 +310,28 @@ class MainViewModel(application: Application) :
     }
 
     fun updateSocksPort(portString: String): Boolean {
+        val normalizedPort = portString.trim()
+        if (normalizedPort.isEmpty()) {
+            val defaultPort = Preferences.DEFAULT_SOCKS_PORT
+            prefs.socksPort = defaultPort
+            _settingsState.value = _settingsState.value.copy(
+                socksPort = InputFieldState(defaultPort.toString())
+            )
+            return true
+        }
+
         return try {
-            val port = portString.toInt()
+            val port = normalizedPort.toInt()
             if (port in 1025..65535) {
                 prefs.socksPort = port
                 _settingsState.value = _settingsState.value.copy(
-                    socksPort = InputFieldState(portString)
+                    socksPort = InputFieldState(port.toString())
                 )
                 true
             } else {
                 _settingsState.value = _settingsState.value.copy(
                     socksPort = InputFieldState(
-                        value = portString,
+                        value = normalizedPort,
                         error = application.getString(R.string.invalid_port_range),
                         isValid = false
                     )
@@ -331,7 +341,7 @@ class MainViewModel(application: Application) :
         } catch (e: NumberFormatException) {
             _settingsState.value = _settingsState.value.copy(
                 socksPort = InputFieldState(
-                    value = portString,
+                    value = normalizedPort,
                     error = application.getString(R.string.invalid_port),
                     isValid = false
                 )
@@ -341,17 +351,27 @@ class MainViewModel(application: Application) :
     }
 
     fun updateDnsIpv4(ipv4Addr: String): Boolean {
-        val matcher = IPV4_PATTERN.matcher(ipv4Addr)
-        return if (matcher.matches()) {
-            prefs.dnsIpv4 = ipv4Addr
+        val normalizedIpv4 = ipv4Addr.trim()
+        if (normalizedIpv4.isEmpty()) {
+            val defaultIpv4 = Preferences.DEFAULT_DNS_IPV4
+            prefs.dnsIpv4 = defaultIpv4
             _settingsState.value = _settingsState.value.copy(
-                dnsIpv4 = InputFieldState(ipv4Addr)
+                dnsIpv4 = InputFieldState(defaultIpv4)
+            )
+            return true
+        }
+
+        val matcher = IPV4_PATTERN.matcher(normalizedIpv4)
+        return if (matcher.matches()) {
+            prefs.dnsIpv4 = normalizedIpv4
+            _settingsState.value = _settingsState.value.copy(
+                dnsIpv4 = InputFieldState(normalizedIpv4)
             )
             true
         } else {
             _settingsState.value = _settingsState.value.copy(
                 dnsIpv4 = InputFieldState(
-                    value = ipv4Addr,
+                    value = normalizedIpv4,
                     error = application.getString(R.string.invalid_ipv4),
                     isValid = false
                 )
@@ -361,17 +381,27 @@ class MainViewModel(application: Application) :
     }
 
     fun updateDnsIpv6(ipv6Addr: String): Boolean {
-        val matcher = IPV6_PATTERN.matcher(ipv6Addr)
-        return if (matcher.matches()) {
-            prefs.dnsIpv6 = ipv6Addr
+        val normalizedIpv6 = ipv6Addr.trim()
+        if (normalizedIpv6.isEmpty()) {
+            val defaultIpv6 = Preferences.DEFAULT_DNS_IPV6
+            prefs.dnsIpv6 = defaultIpv6
             _settingsState.value = _settingsState.value.copy(
-                dnsIpv6 = InputFieldState(ipv6Addr)
+                dnsIpv6 = InputFieldState(defaultIpv6)
+            )
+            return true
+        }
+
+        val matcher = IPV6_PATTERN.matcher(normalizedIpv6)
+        return if (matcher.matches()) {
+            prefs.dnsIpv6 = normalizedIpv6
+            _settingsState.value = _settingsState.value.copy(
+                dnsIpv6 = InputFieldState(normalizedIpv6)
             )
             true
         } else {
             _settingsState.value = _settingsState.value.copy(
                 dnsIpv6 = InputFieldState(
-                    value = ipv6Addr,
+                    value = normalizedIpv6,
                     error = application.getString(R.string.invalid_ipv6),
                     isValid = false
                 )
@@ -388,6 +418,16 @@ class MainViewModel(application: Application) :
     }
 
     fun updateTunRoutes(routes: String): Boolean {
+        if (routes.isBlank()) {
+            val defaultRoutes =
+                application.resources.getStringArray(R.array.default_tun_routes).joinToString("\n")
+            prefs.tunRoutes = defaultRoutes
+            _settingsState.value = _settingsState.value.copy(
+                tunRoutes = InputFieldState(defaultRoutes)
+            )
+            return true
+        }
+
         if (!TProxyService.validateTunRoutes(routes)) {
             _settingsState.value = _settingsState.value.copy(
                 tunRoutes = InputFieldState(
@@ -415,14 +455,14 @@ class MainViewModel(application: Application) :
 
     fun updateHevSocks5TunnelConfig(config: String): Boolean {
         if (config.isBlank()) {
+            val defaultConfig = Preferences.DEFAULT_HEV_SOCKS5_TUNNEL_CONFIG
+            prefs.hevSocks5TunnelConfig = defaultConfig
             _settingsState.value = _settingsState.value.copy(
                 hevSocks5TunnelConfig = InputFieldState(
-                    value = config,
-                    error = application.getString(R.string.invalid_hev_socks5_tunnel_config),
-                    isValid = false
+                    value = defaultConfig
                 )
             )
-            return false
+            return true
         }
 
         prefs.hevSocks5TunnelConfig = config
@@ -609,21 +649,31 @@ class MainViewModel(application: Application) :
     }
 
     fun updateConnectivityTestTarget(target: String) {
+        val normalizedTarget = target.trim()
+        if (normalizedTarget.isEmpty()) {
+            val defaultTarget = application.getString(R.string.connectivity_test_url)
+            prefs.connectivityTestTarget = defaultTarget
+            _settingsState.value = _settingsState.value.copy(
+                connectivityTestTarget = InputFieldState(defaultTarget)
+            )
+            return
+        }
+
         val isValid = try {
-            val url = URL(target)
+            val url = URL(normalizedTarget)
             url.protocol == "http" || url.protocol == "https"
         } catch (e: Exception) {
             false
         }
         if (isValid) {
-            prefs.connectivityTestTarget = target
+            prefs.connectivityTestTarget = normalizedTarget
             _settingsState.value = _settingsState.value.copy(
-                connectivityTestTarget = InputFieldState(target)
+                connectivityTestTarget = InputFieldState(normalizedTarget)
             )
         } else {
             _settingsState.value = _settingsState.value.copy(
                 connectivityTestTarget = InputFieldState(
-                    value = target,
+                    value = normalizedTarget,
                     error = application.getString(R.string.connectivity_test_invalid_url),
                     isValid = false
                 )
@@ -632,16 +682,26 @@ class MainViewModel(application: Application) :
     }
 
     fun updateConnectivityTestTimeout(timeout: String) {
-        val timeoutInt = timeout.toIntOrNull()
+        val normalizedTimeout = timeout.trim()
+        if (normalizedTimeout.isEmpty()) {
+            val defaultTimeout = Preferences.DEFAULT_CONNECTIVITY_TEST_TIMEOUT
+            prefs.connectivityTestTimeout = defaultTimeout
+            _settingsState.value = _settingsState.value.copy(
+                connectivityTestTimeout = InputFieldState(defaultTimeout.toString())
+            )
+            return
+        }
+
+        val timeoutInt = normalizedTimeout.toIntOrNull()
         if (timeoutInt != null && timeoutInt > 0) {
             prefs.connectivityTestTimeout = timeoutInt
             _settingsState.value = _settingsState.value.copy(
-                connectivityTestTimeout = InputFieldState(timeout)
+                connectivityTestTimeout = InputFieldState(timeoutInt.toString())
             )
         } else {
             _settingsState.value = _settingsState.value.copy(
                 connectivityTestTimeout = InputFieldState(
-                    value = timeout,
+                    value = normalizedTimeout,
                     error = application.getString(R.string.invalid_timeout),
                     isValid = false
                 )
@@ -808,11 +868,19 @@ class MainViewModel(application: Application) :
         }
 
         val job = viewModelScope.launch(Dispatchers.IO) {
+            val effectiveUrl = url.trim().ifBlank {
+                if (fileName == "geoip.dat") {
+                    application.getString(R.string.geoip_url)
+                } else {
+                    application.getString(R.string.geosite_url)
+                }
+            }
+
             val progressFlow = if (fileName == "geoip.dat") {
-                prefs.geoipUrl = url
+                prefs.geoipUrl = effectiveUrl
                 _geoipDownloadProgress
             } else {
-                prefs.geositeUrl = url
+                prefs.geositeUrl = effectiveUrl
                 _geositeDownloadProgress
             }
 
@@ -825,7 +893,7 @@ class MainViewModel(application: Application) :
             try {
                 progressFlow.value = application.getString(R.string.connecting)
 
-                val request = Request.Builder().url(url).build()
+                val request = Request.Builder().url(effectiveUrl).build()
                 val call = client.newCall(request)
                 val response = call.await()
 
