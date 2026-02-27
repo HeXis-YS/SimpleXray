@@ -32,6 +32,7 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.InterruptedIOException
+import java.util.regex.Pattern
 import kotlin.concurrent.Volatile
 import kotlin.system.exitProcess
 
@@ -264,122 +265,11 @@ class TProxyService : VpnService() {
 
         if (prefs.ipv4) {
             addAddress(prefs.tunnelIpv4Address, prefs.tunnelIpv4Prefix)
-            if (prefs.bypassLan) {
-                addRoute("1.0.0.0", 8)
-                addRoute("2.0.0.0", 7)
-                addRoute("4.0.0.0", 6)
-                addRoute("8.0.0.0", 7)
-                addRoute("11.0.0.0", 8)
-                addRoute("12.0.0.0", 6)
-                addRoute("16.0.0.0", 4)
-                addRoute("32.0.0.0", 3)
-                addRoute("64.0.0.0", 3)
-                addRoute("96.0.0.0", 6)
-                addRoute("100.0.0.0", 10)
-                addRoute("100.128.0.0", 9)
-                addRoute("101.0.0.0", 8)
-                addRoute("102.0.0.0", 7)
-                addRoute("104.0.0.0", 5)
-                addRoute("112.0.0.0", 5)
-                addRoute("120.0.0.0", 6)
-                addRoute("124.0.0.0", 7)
-                addRoute("126.0.0.0", 8)
-                addRoute("128.0.0.0", 3)
-                addRoute("160.0.0.0", 5)
-                addRoute("168.0.0.0", 8)
-                addRoute("169.0.0.0", 9)
-                addRoute("169.128.0.0", 10)
-                addRoute("169.192.0.0", 11)
-                addRoute("169.224.0.0", 12)
-                addRoute("169.240.0.0", 13)
-                addRoute("169.248.0.0", 14)
-                addRoute("169.252.0.0", 15)
-                addRoute("169.255.0.0", 16)
-                addRoute("170.0.0.0", 7)
-                addRoute("172.0.0.0", 12)
-                addRoute("172.32.0.0", 11)
-                addRoute("172.64.0.0", 10)
-                addRoute("172.128.0.0", 9)
-                addRoute("173.0.0.0", 8)
-                addRoute("174.0.0.0", 7)
-                addRoute("176.0.0.0", 4)
-                addRoute("192.0.1.0", 24)
-                addRoute("192.0.3.0", 24)
-                addRoute("192.0.4.0", 22)
-                addRoute("192.0.8.0", 21)
-                addRoute("192.0.16.0", 20)
-                addRoute("192.0.32.0", 19)
-                addRoute("192.0.64.0", 18)
-                addRoute("192.0.128.0", 17)
-                addRoute("192.1.0.0", 16)
-                addRoute("192.2.0.0", 15)
-                addRoute("192.4.0.0", 14)
-                addRoute("192.8.0.0", 13)
-                addRoute("192.16.0.0", 12)
-                addRoute("192.32.0.0", 11)
-                addRoute("192.64.0.0", 12)
-                addRoute("192.80.0.0", 13)
-                addRoute("192.88.0.0", 18)
-                addRoute("192.88.64.0", 19)
-                addRoute("192.88.96.0", 23)
-                addRoute("192.88.98.0", 24)
-                addRoute("192.88.100.0", 22)
-                addRoute("192.88.104.0", 21)
-                addRoute("192.88.112.0", 20)
-                addRoute("192.88.128.0", 17)
-                addRoute("192.89.0.0", 16)
-                addRoute("192.90.0.0", 15)
-                addRoute("192.92.0.0", 14)
-                addRoute("192.96.0.0", 11)
-                addRoute("192.128.0.0", 11)
-                addRoute("192.160.0.0", 13)
-                addRoute("192.169.0.0", 16)
-                addRoute("192.170.0.0", 15)
-                addRoute("192.172.0.0", 14)
-                addRoute("192.176.0.0", 12)
-                addRoute("192.192.0.0", 10)
-                addRoute("193.0.0.0", 8)
-                addRoute("194.0.0.0", 7)
-                addRoute("196.0.0.0", 7)
-                addRoute("198.0.0.0", 11)
-                addRoute("198.32.0.0", 12)
-                addRoute("198.48.0.0", 15)
-                addRoute("198.50.0.0", 16)
-                addRoute("198.51.0.0", 18)
-                addRoute("198.51.64.0", 19)
-                addRoute("198.51.96.0", 22)
-                addRoute("198.51.101.0", 24)
-                addRoute("198.51.102.0", 23)
-                addRoute("198.51.104.0", 21)
-                addRoute("198.51.112.0", 20)
-                addRoute("198.51.128.0", 17)
-                addRoute("198.52.0.0", 14)
-                addRoute("198.56.0.0", 13)
-                addRoute("198.64.0.0", 10)
-                addRoute("198.128.0.0", 9)
-                addRoute("199.0.0.0", 8)
-                addRoute("200.0.0.0", 7)
-                addRoute("202.0.0.0", 8)
-                addRoute("203.0.0.0", 18)
-                addRoute("203.0.64.0", 19)
-                addRoute("203.0.96.0", 20)
-                addRoute("203.0.112.0", 24)
-                addRoute("203.0.114.0", 23)
-                addRoute("203.0.116.0", 22)
-                addRoute("203.0.120.0", 21)
-                addRoute("203.0.128.0", 17)
-                addRoute("203.1.0.0", 16)
-                addRoute("203.2.0.0", 15)
-                addRoute("203.4.0.0", 14)
-                addRoute("203.8.0.0", 13)
-                addRoute("203.16.0.0", 12)
-                addRoute("203.32.0.0", 11)
-                addRoute("203.64.0.0", 10)
-                addRoute("203.128.0.0", 9)
-                addRoute("204.0.0.0", 6)
-                addRoute("208.0.0.0", 4)
-            } else {
-                addRoute("0.0.0.0", 0)
+            val routeSpec = parseTunRoutes(prefs.tunRoutes)
+                ?: parseTunRoutes(resources.getStringArray(R.array.default_tun_routes).joinToString("\n"))
+                ?: emptyList()
+            for ((address, prefix) in routeSpec) {
+                addRoute(address, prefix)
             }
             prefs.dnsIpv4.takeIf { it.isNotEmpty() }?.also { addDnsServer(it) }
         }
@@ -459,6 +349,9 @@ class TProxyService : VpnService() {
         const val EXTRA_LOG_DATA: String = "log_data"
         private const val TAG = "VpnService"
         private const val BROADCAST_DELAY_MS: Long = 3000
+        private const val IPV4_REGEX =
+            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        private val IPV4_PATTERN: Pattern = Pattern.compile(IPV4_REGEX)
 
         init {
             System.loadLibrary("hev-socks5-tunnel")
@@ -499,6 +392,33 @@ class TProxyService : VpnService() {
                 Log.e(TAG, "Error getting native library dir", e)
                 return null
             }
+        }
+
+        fun validateTunRoutes(routes: String): Boolean {
+            return parseTunRoutes(routes) != null
+        }
+
+        private fun parseTunRoutes(routes: String): List<Pair<String, Int>>? {
+            val parsedRoutes = mutableListOf<Pair<String, Int>>()
+            for (line in routes.lineSequence()) {
+                val route = line.trim()
+                if (route.isEmpty()) {
+                    continue
+                }
+
+                val parts = route.split("/", limit = 2)
+                if (parts.size != 2 || !IPV4_PATTERN.matcher(parts[0]).matches()) {
+                    return null
+                }
+
+                val prefix = parts[1].toIntOrNull() ?: return null
+                if (prefix !in 0..32) {
+                    return null
+                }
+
+                parsedRoutes.add(parts[0] to prefix)
+            }
+            return parsedRoutes.takeIf { it.isNotEmpty() }
         }
 
         private fun getTproxyConf(prefs: Preferences): String {

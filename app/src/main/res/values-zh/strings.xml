@@ -15,8 +15,6 @@
     <string name="ipv6_enabled">为VPN接口启用IPv6</string>
     <string name="new_profile">新建</string>
     <string name="configuration">配置</string>
-    <string name="bypass_lan_title">绕过局域网</string>
-    <string name="bypass_lan_summary">启用时，局域网流量不通过代理</string>
     <string name="vpn_interface">VPN接口</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
@@ -100,6 +98,11 @@
     <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
     <string name="auto">自动</string>
+    <string name="tun_routes_title">Tun 路由</string>
+    <string name="tun_routes_summary">每行一个 CIDR 路由，例如：1.0.0.0/8</string>
+    <string name="tun_routes_preview">%1$d 条路由，首条：%2$s</string>
+    <string name="tun_routes_empty">点击编辑 Tun 路由</string>
+    <string name="invalid_tun_routes">路由格式无效，请按每行一个 IPv4 CIDR 填写。</string>
     <string name="hev_socks5_tunnel_config_title">hev-socks5-tunnel 配置</string>
     <string name="hev_socks5_tunnel_config_empty">点击编辑自定义 YAML</string>
     <string name="invalid_hev_socks5_tunnel_config">配置不能为空</string>

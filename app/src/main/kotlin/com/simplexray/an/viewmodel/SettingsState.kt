@@ -10,7 +10,6 @@ data class InputFieldState(
 
 data class SwitchStates(
     val ipv6Enabled: Boolean,
-    val bypassLanEnabled: Boolean,
     val disableVpn: Boolean,
     val themeMode: ThemeMode
 )
@@ -31,6 +30,7 @@ data class FileStates(
 
 data class SettingsState(
     val socksPort: InputFieldState,
+    val tunRoutes: InputFieldState,
     val hevSocks5TunnelConfig: InputFieldState,
     val dnsIpv4: InputFieldState,
     val dnsIpv6: InputFieldState,

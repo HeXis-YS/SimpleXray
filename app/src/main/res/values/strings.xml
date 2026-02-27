@@ -20,8 +20,6 @@
     <string name="ipv6_enabled">Enable IPv6 for VPN Interface</string>
     <string name="new_profile">New Profile</string>
     <string name="configuration">Configuration</string>
-    <string name="bypass_lan_title">Bypass LAN</string>
-    <string name="bypass_lan_summary">When enabled, LAN traffic will not go through the proxy.</string>
     <string name="vpn_interface">VPN Interface</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
@@ -105,6 +103,11 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="auto">Auto</string>
+    <string name="tun_routes_title">Tun Routes</string>
+    <string name="tun_routes_summary">One CIDR route per line. Example: 1.0.0.0/8</string>
+    <string name="tun_routes_preview">%1$d routes, first: %2$s</string>
+    <string name="tun_routes_empty">Tap to edit tunnel routes</string>
+    <string name="invalid_tun_routes">Invalid routes format. Use one IPv4 CIDR per line.</string>
     <string name="hev_socks5_tunnel_config_title">hev-socks5-tunnel config</string>
     <string name="hev_socks5_tunnel_config_empty">Tap to edit custom YAML</string>
     <string name="invalid_hev_socks5_tunnel_config">Configuration cannot be empty</string>

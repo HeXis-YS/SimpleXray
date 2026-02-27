@@ -98,7 +98,7 @@ class FileManager(private val application: Application, private val prefs: Prefe
                 preferencesMap[Preferences.APPS] = ArrayList(
                     prefs.apps ?: emptySet()
                 )
-                preferencesMap[Preferences.BYPASS_LAN] = prefs.bypassLan
+                preferencesMap[Preferences.TUN_ROUTES] = prefs.tunRoutes
                 preferencesMap[Preferences.CONFIG_FILES_ORDER] = prefs.configFilesOrder
                 preferencesMap[Preferences.DISABLE_VPN] = prefs.disableVpn
                 preferencesMap[Preferences.CONNECTIVITY_TEST_TARGET] = prefs.connectivityTestTarget
@@ -243,9 +243,9 @@ class FileManager(private val application: Application, private val prefs: Prefe
                         prefs.ipv6 = (value as Boolean?)!!
                     }
 
-                    value = preferencesMap[Preferences.BYPASS_LAN]
-                    if (value is Boolean) {
-                        prefs.bypassLan = (value as Boolean?)!!
+                    value = preferencesMap[Preferences.TUN_ROUTES]
+                    if (value is String) {
+                        prefs.tunRoutes = value
                     }
 
                     value = preferencesMap[Preferences.APPS]

@@ -172,6 +172,14 @@ class Preferences(context: Context) {
             setValueInProvider(DISABLE_VPN, value)
         }
 
+    var tunRoutes: String
+        get() = getPrefData(TUN_ROUTES).first
+            ?.takeIf { it.isNotBlank() }
+            ?: context1.resources.getStringArray(R.array.default_tun_routes).joinToString("\n")
+        set(value) {
+            setValueInProvider(TUN_ROUTES, value)
+        }
+
     var hevSocks5TunnelConfig: String
         get() = getPrefData(HEV_SOCKS5_TUNNEL_CONFIG).first
             ?.takeIf { it.isNotBlank() }
@@ -199,12 +207,6 @@ class Preferences(context: Context) {
         get() = getPrefData(SELECTED_CONFIG_PATH).first
         set(path) {
             setValueInProvider(SELECTED_CONFIG_PATH, path)
-        }
-
-    var bypassLan: Boolean
-        get() = getBooleanPref(BYPASS_LAN, true)
-        set(enable) {
-            setValueInProvider(BYPASS_LAN, enable)
         }
 
     var customGeoipImported: Boolean
@@ -285,11 +287,11 @@ class Preferences(context: Context) {
         const val APPS: String = "Apps"
         const val ENABLE: String = "Enable"
         const val SELECTED_CONFIG_PATH: String = "SelectedConfigPath"
-        const val BYPASS_LAN: String = "BypassLan"
         const val CUSTOM_GEOIP_IMPORTED: String = "CustomGeoipImported"
         const val CUSTOM_GEOSITE_IMPORTED: String = "CustomGeositeImported"
         const val CONFIG_FILES_ORDER: String = "ConfigFilesOrder"
         const val DISABLE_VPN: String = "DisableVpn"
+        const val TUN_ROUTES: String = "TunRoutes"
         const val HEV_SOCKS5_TUNNEL_CONFIG: String = "HevSocks5TunnelConfig"
         const val CONNECTIVITY_TEST_TARGET: String = "ConnectivityTestTarget"
         const val CONNECTIVITY_TEST_TIMEOUT: String = "ConnectivityTestTimeout"

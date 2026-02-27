@@ -81,12 +81,12 @@ class MainViewModel(application: Application) :
     private val _settingsState = MutableStateFlow(
         SettingsState(
             socksPort = InputFieldState(prefs.socksPort.toString()),
+            tunRoutes = InputFieldState(prefs.tunRoutes),
             hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
             dnsIpv4 = InputFieldState(prefs.dnsIpv4),
             dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
-                bypassLanEnabled = prefs.bypassLan,
                 disableVpn = prefs.disableVpn,
                 themeMode = prefs.theme
             ),
@@ -161,12 +161,12 @@ class MainViewModel(application: Application) :
     private fun updateSettingsState() {
         _settingsState.value = _settingsState.value.copy(
             socksPort = InputFieldState(prefs.socksPort.toString()),
+            tunRoutes = InputFieldState(prefs.tunRoutes),
             hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
             dnsIpv4 = InputFieldState(prefs.dnsIpv4),
             dnsIpv6 = InputFieldState(prefs.dnsIpv6),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
-                bypassLanEnabled = prefs.bypassLan,
                 disableVpn = prefs.disableVpn,
                 themeMode = prefs.theme
             ),
@@ -387,11 +387,23 @@ class MainViewModel(application: Application) :
         )
     }
 
-    fun setBypassLanEnabled(enabled: Boolean) {
-        prefs.bypassLan = enabled
+    fun updateTunRoutes(routes: String): Boolean {
+        if (!TProxyService.validateTunRoutes(routes)) {
+            _settingsState.value = _settingsState.value.copy(
+                tunRoutes = InputFieldState(
+                    value = routes,
+                    error = application.getString(R.string.invalid_tun_routes),
+                    isValid = false
+                )
+            )
+            return false
+        }
+
+        prefs.tunRoutes = routes
         _settingsState.value = _settingsState.value.copy(
-            switches = _settingsState.value.switches.copy(bypassLanEnabled = enabled)
+            tunRoutes = InputFieldState(routes)
         )
+        return true
     }
 
     fun setDisableVpnEnabled(enabled: Boolean) {

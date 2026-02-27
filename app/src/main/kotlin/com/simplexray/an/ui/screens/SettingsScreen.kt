@@ -72,6 +72,19 @@ fun SettingsScreen(
     val geositeProgress by mainViewModel.geositeDownloadProgress.collectAsStateWithLifecycle()
 
     val vpnDisabled = settingsState.switches.disableVpn
+    val tunRoutesList = settingsState.tunRoutes.value.lineSequence()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .toList()
+    val tunRoutesPreview = if (tunRoutesList.isEmpty()) {
+        stringResource(R.string.tun_routes_empty)
+    } else {
+        stringResource(
+            R.string.tun_routes_preview,
+            tunRoutesList.size,
+            tunRoutesList.first()
+        )
+    }
     val hevSocks5TunnelConfigPreview = settingsState.hevSocks5TunnelConfig.value
         .lineSequence()
         .firstOrNull { it.isNotBlank() }
@@ -401,18 +414,19 @@ fun SettingsScreen(
             }
         )
 
-        ListItem(
-            headlineContent = { Text(stringResource(R.string.bypass_lan_title)) },
-            supportingContent = { Text(stringResource(R.string.bypass_lan_summary)) },
-            trailingContent = {
-                Switch(
-                    checked = settingsState.switches.bypassLanEnabled,
-                    onCheckedChange = {
-                        mainViewModel.setBypassLanEnabled(it)
-                    },
-                    enabled = !vpnDisabled
-                )
-            }
+        EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.tun_routes_title),
+            currentValue = settingsState.tunRoutes.value,
+            supportingValue = tunRoutesPreview,
+            onValueConfirmed = { newValue -> mainViewModel.updateTunRoutes(newValue) },
+            label = stringResource(R.string.tun_routes_title),
+            isError = !settingsState.tunRoutes.isValid,
+            errorMessage = settingsState.tunRoutes.error,
+            enabled = !vpnDisabled,
+            minLines = 8,
+            maxLines = 24,
+            sheetState = sheetState,
+            scope = scope
         )
 
         PreferenceCategoryTitle(stringResource(R.string.rule_files_category_title))
