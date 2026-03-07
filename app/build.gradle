@@ -9,7 +9,7 @@ file("$rootDir/version.properties").withInputStream { versionProps.load(it) }
 
 android {
     namespace "com.simplexray.an"
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.simplexray.an"
