@@ -34,7 +34,7 @@ fun rememberMainScreenLaunchers(mainViewModel: MainViewModel): MainScreenLaunche
             }
         } else {
             Log.w("MainActivity", "Backup file creation cancelled or failed (URI is null).")
-            mainViewModel.clearCompressedBackupData()
+            mainViewModel.clearPendingBackupData()
         }
     }
 

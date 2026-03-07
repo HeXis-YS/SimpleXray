@@ -23,9 +23,6 @@ import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.zip.DataFormatException
-import java.util.zip.Deflater
-import java.util.zip.Inflater
 import kotlin.math.log10
 import kotlin.math.pow
 
@@ -85,7 +82,7 @@ class FileManager(private val application: Application, private val prefs: Prefe
         }
     }
 
-    suspend fun compressBackupData(): ByteArray? {
+    suspend fun buildBackupData(): ByteArray? {
         return withContext(Dispatchers.IO) {
             try {
                 val gson = Gson()
@@ -109,30 +106,18 @@ class FileManager(private val application: Application, private val prefs: Prefe
                 backupData["preferences"] = preferencesMap
                 backupData["configFiles"] = configFilesMap
                 val jsonString = gson.toJson(backupData)
-                val input = jsonString.toByteArray(StandardCharsets.UTF_8)
-                val deflater = Deflater()
-                deflater.setInput(input)
-                deflater.finish()
-                val outputStream = ByteArrayOutputStream(input.size)
-                val buffer = ByteArray(1024)
-                while (!deflater.finished()) {
-                    val count = deflater.deflate(buffer)
-                    outputStream.write(buffer, 0, count)
-                }
-                outputStream.close()
-                deflater.end()
-                outputStream.toByteArray()
+                jsonString.toByteArray(StandardCharsets.UTF_8)
             } catch (e: Exception) {
-                Log.e(TAG, "Error during backup compression", e)
+                Log.e(TAG, "Error building backup data", e)
                 null
             }
         }
     }
 
-    suspend fun decompressAndRestore(uri: Uri): Boolean {
+    suspend fun restoreFromBackup(uri: Uri): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                var compressedData: ByteArray
+                var backupDataBytes: ByteArray
                 application.contentResolver.openInputStream(uri).use { `is` ->
                     if (`is` == null) {
                         throw IOException("Failed to open input stream for URI: $uri")
@@ -143,35 +128,9 @@ class FileManager(private val application: Application, private val prefs: Prefe
                     while ((`is`.read(data, 0, data.size).also { nRead = it }) != -1) {
                         buffer.write(data, 0, nRead)
                     }
-                    compressedData = buffer.toByteArray()
+                    backupDataBytes = buffer.toByteArray()
                 }
-                val inflater = Inflater()
-                inflater.setInput(compressedData)
-                val outputStream = ByteArrayOutputStream(compressedData.size)
-                val buffer = ByteArray(1024)
-                while (!inflater.finished()) {
-                    try {
-                        val count = inflater.inflate(buffer)
-                        if (count == 0 && inflater.needsInput()) {
-                            Log.e(TAG, "Incomplete compressed data during inflation.")
-                            throw IOException("Incomplete compressed data.")
-                        }
-                        if (count > 0) {
-                            outputStream.write(buffer, 0, count)
-                        }
-                    } catch (e: DataFormatException) {
-                        Log.e(TAG, "Data format error during inflation", e)
-                        throw IOException("Error decompressing data: Invalid format.", e)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error during inflation", e)
-                        throw IOException("Error decompressing data.", e)
-                    }
-                }
-                outputStream.close()
-                val decompressedData = outputStream.toByteArray()
-                inflater.end()
-
-                val jsonString = String(decompressedData, StandardCharsets.UTF_8)
+                val jsonString = String(backupDataBytes, StandardCharsets.UTF_8)
                 val gson = Gson()
                 val backupDataType = object : TypeToken<Map<String?, Any?>?>() {}.type
                 val backupData = gson.fromJson<Map<String, Any>>(jsonString, backupDataType)

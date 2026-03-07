@@ -68,7 +68,7 @@ class MainViewModel(application: Application) :
     AndroidViewModel(application) {
     val prefs: Preferences = Preferences(application)
     private val activityScope: CoroutineScope = viewModelScope
-    private var compressedBackupData: ByteArray? = null
+    private var pendingBackupData: ByteArray? = null
 
     private val fileManager: FileManager = FileManager(application, prefs)
 
@@ -225,13 +225,13 @@ class MainViewModel(application: Application) :
         prefs.enable = enabled
     }
 
-    fun clearCompressedBackupData() {
-        compressedBackupData = null
+    fun clearPendingBackupData() {
+        pendingBackupData = null
     }
 
     fun performBackup(createFileLauncher: ActivityResultLauncher<String>) {
         activityScope.launch {
-            compressedBackupData = fileManager.compressBackupData()
+            pendingBackupData = fileManager.buildBackupData()
             val filename = "simplexray_backup_" + System.currentTimeMillis() + ".dat"
             withContext(Dispatchers.Main) {
                 createFileLauncher.launch(filename)
@@ -241,9 +241,9 @@ class MainViewModel(application: Application) :
 
     suspend fun handleBackupFileCreationResult(uri: Uri) {
         withContext(Dispatchers.IO) {
-            if (compressedBackupData != null) {
-                val dataToWrite: ByteArray = compressedBackupData as ByteArray
-                compressedBackupData = null
+            if (pendingBackupData != null) {
+                val dataToWrite: ByteArray = pendingBackupData as ByteArray
+                pendingBackupData = null
                 try {
                     application.contentResolver.openOutputStream(uri).use { os ->
                         if (os != null) {
@@ -261,14 +261,14 @@ class MainViewModel(application: Application) :
                 }
             } else {
                 _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.backup_failed)))
-                Log.e(TAG, "Compressed backup data is null in launcher callback.")
+                Log.e(TAG, "Pending backup data is null in launcher callback.")
             }
         }
     }
 
     suspend fun startRestoreTask(uri: Uri) {
         withContext(Dispatchers.IO) {
-            val success = fileManager.decompressAndRestore(uri)
+            val success = fileManager.restoreFromBackup(uri)
             if (success) {
                 updateSettingsState()
                 _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.restore_success)))
