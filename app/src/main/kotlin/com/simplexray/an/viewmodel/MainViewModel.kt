@@ -983,10 +983,11 @@ class MainViewModel(application: Application) :
 
             val client = OkHttpClient.Builder().apply {
                 if (_isServiceEnabled.value) {
+                    val socksServer = parseSocksServerAddress(prefs.connectivityTestSocksServer)!!
                     proxy(
                         Proxy(
                             Proxy.Type.SOCKS,
-                            InetSocketAddress("::1", Preferences.DEFAULT_SOCKS_PORT)
+                            InetSocketAddress(socksServer.first, socksServer.second)
                         )
                     )
                 }

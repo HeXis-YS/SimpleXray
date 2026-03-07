@@ -295,7 +295,6 @@ class Preferences(context: Context) {
         }
 
     companion object {
-        const val DEFAULT_SOCKS_PORT: Int = 10809
         const val MIN_TUN_MTU: Int = 68
         const val MAX_TUN_MTU: Int = 65535
         const val DEFAULT_TUN_DNS_IPV4: String = "1.1.1.1, 1.0.0.1"
