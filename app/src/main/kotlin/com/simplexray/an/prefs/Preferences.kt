@@ -304,7 +304,7 @@ class Preferences(context: Context) {
         const val DEFAULT_TUN_MTU: Int = 65535
         const val DEFAULT_TUN_IPV4_CIDR: String = "192.0.0.8/32"
         const val DEFAULT_TUN_IPV6_CIDR: String = "fc00::1/128"
-        const val DEFAULT_CONNECTIVITY_TEST_SOCKS_SERVER: String = "127.0.0.1:10809"
+        const val DEFAULT_CONNECTIVITY_TEST_SOCKS_SERVER: String = "[::1]:10809"
         const val DEFAULT_CONNECTIVITY_TEST_TIMEOUT: Int = 3000
         const val TUN_DNS_IPV4: String = "TunDnsIpv4"
         const val TUN_DNS_IPV6: String = "TunDnsIpv6"
