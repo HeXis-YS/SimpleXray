@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.application
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -30,9 +29,7 @@ import com.simplexray.an.viewmodel.LogViewModelFactory
 import com.simplexray.an.viewmodel.LogSource
 import com.simplexray.an.viewmodel.MainViewModel
 import com.simplexray.an.viewmodel.MainViewUiEvent
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
@@ -41,7 +38,6 @@ fun MainScreen(
     snackbarHostState: SnackbarHostState
 ) {
     val bottomNavController = rememberNavController()
-    val scope = rememberCoroutineScope()
 
     val launchers = rememberMainScreenLaunchers(mainViewModel)
 
@@ -77,10 +73,6 @@ fun MainScreen(
     var lastNavigationTime = 0L
 
     LaunchedEffect(Unit) {
-        scope.launch(Dispatchers.IO) {
-            mainViewModel.extractAssetsIfNeeded()
-        }
-
         mainViewModel.uiEvent.collectLatest { event ->
             when (event) {
                 is MainViewUiEvent.ShowSnackbar -> {

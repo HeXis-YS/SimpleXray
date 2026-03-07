@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -119,9 +118,6 @@ fun SettingsScreen(
         ?.take(80)
         ?: stringResource(R.string.hev_socks5_tunnel_config_empty)
 
-    var showGeoipDeleteDialog by remember { mutableStateOf(false) }
-    var showGeositeDeleteDialog by remember { mutableStateOf(false) }
-
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
@@ -212,52 +208,6 @@ fun SettingsScreen(
                 }
             }
         }
-    }
-
-    if (showGeoipDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showGeoipDeleteDialog = false },
-            title = { Text(stringResource(R.string.delete_rule_file_title)) },
-            text = { Text(stringResource(R.string.delete_rule_file_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        mainViewModel.restoreDefaultGeoip { }
-                        showGeoipDeleteDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showGeoipDeleteDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
-
-    if (showGeositeDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showGeositeDeleteDialog = false },
-            title = { Text(stringResource(R.string.delete_rule_file_title)) },
-            text = { Text(stringResource(R.string.delete_rule_file_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        mainViewModel.restoreDefaultGeosite { }
-                        showGeositeDeleteDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showGeositeDeleteDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
     }
 
     Column(
@@ -521,20 +471,11 @@ fun SettingsScreen(
                                 contentDescription = stringResource(R.string.rule_file_update_url)
                             )
                         }
-                        if (!settingsState.files.isGeoipCustom) {
-                            IconButton(onClick = { geoipFilePickerLauncher.launch(arrayOf("*/*")) }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.place_item),
-                                    contentDescription = stringResource(R.string.import_file)
-                                )
-                            }
-                        } else {
-                            IconButton(onClick = { showGeoipDeleteDialog = true }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.delete),
-                                    contentDescription = stringResource(R.string.reset_file)
-                                )
-                            }
+                        IconButton(onClick = { geoipFilePickerLauncher.launch(arrayOf("*/*")) }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.place_item),
+                                contentDescription = stringResource(R.string.import_file)
+                            )
                         }
                     }
                 }
@@ -565,20 +506,11 @@ fun SettingsScreen(
                                 contentDescription = stringResource(R.string.rule_file_update_url)
                             )
                         }
-                        if (!settingsState.files.isGeositeCustom) {
-                            IconButton(onClick = { geositeFilePickerLauncher.launch(arrayOf("*/*")) }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.place_item),
-                                    contentDescription = stringResource(R.string.import_file)
-                                )
-                            }
-                        } else {
-                            IconButton(onClick = { showGeositeDeleteDialog = true }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.delete),
-                                    contentDescription = stringResource(R.string.reset_file)
-                                )
-                            }
+                        IconButton(onClick = { geositeFilePickerLauncher.launch(arrayOf("*/*")) }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.place_item),
+                                contentDescription = stringResource(R.string.import_file)
+                            )
                         }
                     }
                 }

@@ -38,7 +38,7 @@
     <string name="restore_success">恢复成功</string>
     <string name="no_config_files">无配置文件</string>
     <string name="no_log_entries">无日志</string>
-    <string name="rule_file_default">默认规则文件</string>
+    <string name="rule_file_missing">下载规则文件</string>
     <string name="import_success">导入成功</string>
     <string name="rule_files_category_title">规则文件</string>
     <string name="config_in_use">配置文件正在使用</string>
@@ -71,9 +71,6 @@
     <string name="export_success">导出成功</string>
     <string name="import_invalid_format">导入格式无效</string>
     <string name="import_file">导入</string>
-    <string name="reset_file">重置</string>
-    <string name="rule_file_restore_geoip_success">geoip.dat 已恢复为默认</string>
-    <string name="rule_file_restore_geosite_success">geosite.dat 已恢复为默认</string>
     <string name="invalid_timeout">请输入有效的超时时间（正整数）</string>
     <string name="rule_file_update_url">从URL更新</string>
     <string name="update">更新</string>
@@ -84,8 +81,6 @@
     <string name="downloading_no_size">下载中…</string>
     <string name="download_cancelled">下载已取消</string>
     <string name="general">通用</string>
-    <string name="delete_rule_file_title">删除规则文件</string>
-    <string name="delete_rule_file_message">这将恢复为默认规则文件，确定吗？</string>
     <string name="restore_default_url">恢复默认地址</string>
     <string name="theme_title">主题</string>
     <string name="theme_summary">调整主题为深色或浅色</string>

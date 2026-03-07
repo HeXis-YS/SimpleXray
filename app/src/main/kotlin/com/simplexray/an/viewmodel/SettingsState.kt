@@ -23,11 +23,6 @@ data class InfoStates(
     val geositeUrl: String
 )
 
-data class FileStates(
-    val isGeoipCustom: Boolean,
-    val isGeositeCustom: Boolean
-)
-
 data class SettingsState(
     val tunDnsIpv4: InputFieldState,
     val tunDnsIpv6: InputFieldState,
@@ -39,7 +34,6 @@ data class SettingsState(
     val hevSocks5TunnelConfig: InputFieldState,
     val switches: SwitchStates,
     val info: InfoStates,
-    val files: FileStates,
     val connectivityTestSocksServer: InputFieldState,
     val connectivityTestTarget: InputFieldState,
     val connectivityTestTimeout: InputFieldState

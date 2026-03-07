@@ -1,7 +1,6 @@
 package com.simplexray.an.data.source
 
 import android.app.Application
-import android.content.res.AssetManager
 import android.net.Uri
 import android.util.Log
 import com.google.gson.Gson
@@ -17,9 +16,6 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -32,26 +28,7 @@ class FileManager(private val application: Application, private val prefs: Prefe
         return file.readText(StandardCharsets.UTF_8)
     }
 
-    @Throws(IOException::class, NoSuchAlgorithmException::class)
-    private fun calculateSha256(`is`: InputStream): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val buffer = ByteArray(1024)
-        var read: Int
-        `is`.use { inputStream ->
-            while ((inputStream.read(buffer).also { read = it }) != -1) {
-                digest.update(buffer, 0, read)
-            }
-        }
-
-        val hashBytes = digest.digest()
-        val sb = StringBuilder()
-        for (hashByte in hashBytes) {
-            sb.append(String.format("%02x", hashByte))
-        }
-        return sb.toString()
-    }
-
-    suspend fun createConfigFile(assets: AssetManager): String? {
+    suspend fun createConfigFile(): String? {
         return withContext(Dispatchers.IO) {
             val filename = System.currentTimeMillis().toString() + ".json"
             val newFile = File(application.filesDir, filename)
@@ -229,64 +206,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
         }
     }
 
-    fun extractAssetsIfNeeded() {
-        val files = arrayOf("geoip.dat", "geosite.dat")
-        val dir = application.filesDir
-        dir.mkdirs()
-        for (file in files) {
-            val targetFile = File(dir, file)
-            var needsExtraction = false
-
-            val isCustomImported =
-                if (file == "geoip.dat") prefs.customGeoipImported else prefs.customGeositeImported
-
-            if (isCustomImported) {
-                Log.d(TAG, "Custom file already imported for $file, skipping asset extraction.")
-                continue
-            }
-
-            if (targetFile.exists()) {
-                try {
-                    val existingFileHash =
-                        calculateSha256(Files.newInputStream(targetFile.toPath()))
-                    val assetHash = calculateSha256(application.assets.open(file))
-                    if (existingFileHash != assetHash) {
-                        needsExtraction = true
-                    }
-                } catch (e: IOException) {
-                    needsExtraction = true
-                    Log.d(TAG, e.toString())
-                } catch (e: NoSuchAlgorithmException) {
-                    needsExtraction = true
-                    Log.d(TAG, e.toString())
-                }
-            } else {
-                needsExtraction = true
-            }
-            if (needsExtraction) {
-                try {
-                    application.assets.open(file).use { `in` ->
-                        FileOutputStream(targetFile).use { out ->
-                            val buffer = ByteArray(1024)
-                            var read: Int
-                            while ((`in`.read(buffer).also { read = it }) != -1) {
-                                out.write(buffer, 0, read)
-                            }
-                            Log.d(
-                                TAG,
-                                "Extracted asset: " + file + " to " + targetFile.absolutePath
-                            )
-                        }
-                    }
-                } catch (e: IOException) {
-                    throw RuntimeException("Failed to extract asset: $file", e)
-                }
-            } else {
-                Log.d(TAG, "Asset $file already exists and matches hash, skipping extraction.")
-            }
-        }
-    }
-
     suspend fun importRuleFile(uri: Uri, filename: String): Boolean {
         return withContext(Dispatchers.IO) {
             val targetFile = File(application.filesDir, filename)
@@ -301,28 +220,14 @@ class FileManager(private val application: Application, private val prefs: Prefe
                         while ((inputStream.read(buffer).also { read = it }) != -1) {
                             outputStream.write(buffer, 0, read)
                         }
-                        when (filename) {
-                            "geoip.dat" -> prefs.customGeoipImported = true
-                            "geosite.dat" -> prefs.customGeositeImported = true
-                        }
                         Log.d(TAG, "Successfully imported $filename from URI: $uri")
                         true
                     }
                 }
             } catch (e: IOException) {
-                if (filename == "geoip.dat") {
-                    prefs.customGeoipImported = false
-                } else if (filename == "geosite.dat") {
-                    prefs.customGeositeImported = false
-                }
                 Log.e(TAG, "Error importing rule file: $filename", e)
                 false
             } catch (e: Exception) {
-                if (filename == "geoip.dat") {
-                    prefs.customGeoipImported = false
-                } else if (filename == "geosite.dat") {
-                    prefs.customGeositeImported = false
-                }
                 Log.e(TAG, "Unexpected error during rule file import: $filename", e)
                 false
             }
@@ -348,10 +253,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
                 }
 
                 if (tempFile.renameTo(targetFile)) {
-                    when (filename) {
-                        "geoip.dat" -> prefs.customGeoipImported = true
-                        "geosite.dat" -> prefs.customGeositeImported = true
-                    }
                     Log.d(TAG, "Successfully saved $filename from stream")
                     true
                 } else {
@@ -374,16 +275,14 @@ class FileManager(private val application: Application, private val prefs: Prefe
     fun getRuleFileSummary(filename: String): String {
         Log.d(TAG, "getRuleFileSummary called with filename: $filename")
         val file = File(application.filesDir, filename)
-        val isCustomImported =
-            if (filename == "geoip.dat") prefs.customGeoipImported else prefs.customGeositeImported
-        return if (file.exists() && isCustomImported) {
+        return if (file.exists()) {
             val lastModified = file.lastModified()
             val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
             val date = sdf.format(Date(lastModified))
             val size = formatFileSize(file.length())
             "$date | $size"
         } else {
-            application.getString(R.string.rule_file_default)
+            application.getString(R.string.rule_file_missing)
         }
     }
 
@@ -564,40 +463,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
                 return@withContext false
             }
         }
-
-    suspend fun restoreDefaultGeoip(): Boolean {
-        return withContext(Dispatchers.IO) {
-            prefs.customGeoipImported = false
-            val file = File(application.filesDir, "geoip.dat")
-            application.assets.open("geoip.dat").use { input ->
-                FileOutputStream(file).use { output ->
-                    val buffer = ByteArray(1024)
-                    var read: Int
-                    while (input.read(buffer).also { read = it } != -1) {
-                        output.write(buffer, 0, read)
-                    }
-                }
-            }
-            true
-        }
-    }
-
-    suspend fun restoreDefaultGeosite(): Boolean {
-        return withContext(Dispatchers.IO) {
-            prefs.customGeositeImported = false
-            val file = File(application.filesDir, "geosite.dat")
-            application.assets.open("geosite.dat").use { input ->
-                FileOutputStream(file).use { output ->
-                    val buffer = ByteArray(1024)
-                    var read: Int
-                    while (input.read(buffer).also { read = it } != -1) {
-                        output.write(buffer, 0, read)
-                    }
-                }
-            }
-            true
-        }
-    }
 
     companion object {
         const val TAG = "FileManager"

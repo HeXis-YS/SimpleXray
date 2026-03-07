@@ -209,18 +209,6 @@ class Preferences(context: Context) {
             setValueInProvider(SELECTED_CONFIG_PATH, path)
         }
 
-    var customGeoipImported: Boolean
-        get() = getBooleanPref(CUSTOM_GEOIP_IMPORTED, false)
-        set(imported) {
-            setValueInProvider(CUSTOM_GEOIP_IMPORTED, imported)
-        }
-
-    var customGeositeImported: Boolean
-        get() = getBooleanPref(CUSTOM_GEOSITE_IMPORTED, false)
-        set(imported) {
-            setValueInProvider(CUSTOM_GEOSITE_IMPORTED, imported)
-        }
-
     var configFilesOrder: List<String>
         get() {
             val jsonList = getPrefData(CONFIG_FILES_ORDER).first
@@ -315,8 +303,6 @@ class Preferences(context: Context) {
         const val APPS: String = "Apps"
         const val ENABLE: String = "Enable"
         const val SELECTED_CONFIG_PATH: String = "SelectedConfigPath"
-        const val CUSTOM_GEOIP_IMPORTED: String = "CustomGeoipImported"
-        const val CUSTOM_GEOSITE_IMPORTED: String = "CustomGeositeImported"
         const val CONFIG_FILES_ORDER: String = "ConfigFilesOrder"
         const val DISABLE_VPN: String = "DisableVpn"
         const val TUN_ROUTES: String = "TunRoutes"
