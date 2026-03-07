@@ -89,29 +89,7 @@ class FileManager(private val application: Application, private val prefs: Prefe
         return withContext(Dispatchers.IO) {
             try {
                 val gson = Gson()
-                val preferencesMap: MutableMap<String, Any> = mutableMapOf()
-                preferencesMap[Preferences.TUN_DNS_IPV4] = prefs.tunDnsIpv4
-                preferencesMap[Preferences.TUN_DNS_IPV6] = prefs.tunDnsIpv6
-                preferencesMap[Preferences.TUN_NAME] = prefs.tunName
-                preferencesMap[Preferences.TUN_MTU] = prefs.tunMtu
-                preferencesMap[Preferences.TUN_IPV4_CIDR] = prefs.tunIpv4Cidr
-                preferencesMap[Preferences.TUN_IPV6_CIDR] = prefs.tunIpv6Cidr
-                preferencesMap[Preferences.IPV6] = prefs.ipv6
-                preferencesMap[Preferences.APPS] = ArrayList(
-                    prefs.apps ?: emptySet()
-                )
-                preferencesMap[Preferences.TUN_ROUTES] = prefs.tunRoutes
-                preferencesMap[Preferences.CONFIG_FILES_ORDER] = prefs.configFilesOrder
-                preferencesMap[Preferences.DISABLE_VPN] = prefs.disableVpn
-                preferencesMap[Preferences.CONNECTIVITY_TEST_TARGET] = prefs.connectivityTestTarget
-                preferencesMap[Preferences.CONNECTIVITY_TEST_SOCKS_SERVER] =
-                    prefs.connectivityTestSocksServer
-                preferencesMap[Preferences.CONNECTIVITY_TEST_TIMEOUT] =
-                    prefs.connectivityTestTimeout
-                preferencesMap[Preferences.GEOIP_URL] = prefs.geoipUrl
-                preferencesMap[Preferences.GEOSITE_URL] = prefs.geositeUrl
-                preferencesMap[Preferences.BYPASS_SELECTED_APPS] = prefs.bypassSelectedApps
-                preferencesMap[Preferences.HEV_SOCKS5_TUNNEL_CONFIG] = prefs.hevSocks5TunnelConfig
+                val preferencesMap = buildPreferencesBackupMap()
                 val configFilesMap: MutableMap<String, String> = mutableMapOf()
                 val filesDir = application.filesDir
                 val files = filesDir.listFiles()
@@ -221,136 +199,7 @@ class FileManager(private val application: Application, private val prefs: Prefe
                 val savedOrderFromBackup = mutableListOf<String>()
 
                 if (preferencesMap != null) {
-                    var value = preferencesMap[Preferences.TUN_DNS_IPV4]
-                    if (value is String) {
-                        prefs.tunDnsIpv4 = value
-                    }
-
-                    value = preferencesMap[Preferences.TUN_DNS_IPV6]
-                    if (value is String) {
-                        prefs.tunDnsIpv6 = value
-                    }
-
-                    value = preferencesMap[Preferences.TUN_NAME]
-                    if (value is String) {
-                        prefs.tunName = value
-                    }
-
-                    value = preferencesMap[Preferences.TUN_MTU]
-                    if (value is Number) {
-                        prefs.tunMtu = value.toInt()
-                    } else if (value is String) {
-                        try {
-                            prefs.tunMtu = value.toInt()
-                        } catch (ignore: NumberFormatException) {
-                            Log.w(TAG, "Failed to parse TUN_MTU as integer: $value")
-                        }
-                    }
-
-                    value = preferencesMap[Preferences.TUN_IPV4_CIDR]
-                    if (value is String) {
-                        prefs.tunIpv4Cidr = value
-                    }
-
-                    value = preferencesMap[Preferences.TUN_IPV6_CIDR]
-                    if (value is String) {
-                        prefs.tunIpv6Cidr = value
-                    }
-
-                    value = preferencesMap[Preferences.IPV6]
-                    if (value is Boolean) {
-                        prefs.ipv6 = (value as Boolean?)!!
-                    }
-
-                    value = preferencesMap[Preferences.TUN_ROUTES]
-                    if (value is String) {
-                        prefs.tunRoutes = value
-                    }
-
-                    value = preferencesMap[Preferences.APPS]
-                    if (value is List<*>) {
-                        val appsSet: MutableSet<String?> = HashSet()
-                        for (item in value) {
-                            if (item is String) {
-                                appsSet.add(item as String?)
-                            } else if (item != null) {
-                                Log.w(
-                                    TAG,
-                                    "Skipping non-String item in APPS list: " + item.javaClass.name
-                                )
-                            }
-                        }
-                        prefs.apps = appsSet
-                    } else if (value != null) {
-                        Log.w(TAG, "APPS preference is not a List: " + value.javaClass.name)
-                    }
-
-                    value = preferencesMap[Preferences.DISABLE_VPN]
-                    if (value is Boolean) {
-                        prefs.disableVpn = value
-                    }
-
-                    value = preferencesMap[Preferences.CONNECTIVITY_TEST_TARGET]
-                    if (value is String) {
-                        prefs.connectivityTestTarget = value
-                    }
-                    value = preferencesMap[Preferences.CONNECTIVITY_TEST_SOCKS_SERVER]
-                    if (value is String) {
-                        prefs.connectivityTestSocksServer = value
-                    }
-                    value = preferencesMap[Preferences.CONNECTIVITY_TEST_TIMEOUT]
-                    if (value is Number) {
-                        prefs.connectivityTestTimeout = value.toInt()
-                    } else if (value is String) {
-                        try {
-                            prefs.connectivityTestTimeout = value.toInt()
-                        } catch (ignore: NumberFormatException) {
-                            Log.w(
-                                TAG,
-                                "Failed to parse CONNECTIVITY_TEST_TIMEOUT as integer: $value"
-                            )
-                        }
-                    }
-
-                    value = preferencesMap[Preferences.GEOIP_URL]
-                    if (value is String) {
-                        prefs.geoipUrl = value
-                    }
-
-                    value = preferencesMap[Preferences.GEOSITE_URL]
-                    if (value is String) {
-                        prefs.geositeUrl = value
-                    }
-
-                    value = preferencesMap[Preferences.BYPASS_SELECTED_APPS]
-                    if (value is Boolean) {
-                        prefs.bypassSelectedApps = value
-                    }
-
-                    value = preferencesMap[Preferences.HEV_SOCKS5_TUNNEL_CONFIG]
-                    if (value is String) {
-                        prefs.hevSocks5TunnelConfig = value
-                    }
-
-                    val configOrderObj = preferencesMap[Preferences.CONFIG_FILES_ORDER]
-                    if (configOrderObj is List<*>) {
-                        for (item in configOrderObj) {
-                            if (item is String) {
-                                savedOrderFromBackup.add(item)
-                            } else if (item != null) {
-                                Log.w(
-                                    TAG,
-                                    "Skipping non-String item in CONFIG_FILES_ORDER list: " + item.javaClass.name
-                                )
-                            }
-                        }
-                    } else if (configOrderObj != null) {
-                        Log.w(
-                            TAG,
-                            "CONFIG_FILES_ORDER preference is not a List: " + configOrderObj.javaClass.name
-                        )
-                    }
-
+                    restorePreferencesFromBackup(preferencesMap, savedOrderFromBackup)
                 } else {
                     Log.w(TAG, "Preferences map is null or not a Map.")
                 }
@@ -589,6 +438,111 @@ class FileManager(private val application: Application, private val prefs: Prefe
             size / 1024.0.pow(digitGroups.toDouble()),
             units[digitGroups]
         )
+    }
+
+    private fun buildPreferencesBackupMap(): MutableMap<String, Any> {
+        return mutableMapOf<String, Any>().apply {
+            put(Preferences.TUN_DNS_IPV4, prefs.tunDnsIpv4)
+            put(Preferences.TUN_DNS_IPV6, prefs.tunDnsIpv6)
+            put(Preferences.TUN_NAME, prefs.tunName)
+            put(Preferences.TUN_MTU, prefs.tunMtu)
+            put(Preferences.TUN_IPV4_CIDR, prefs.tunIpv4Cidr)
+            put(Preferences.TUN_IPV6_CIDR, prefs.tunIpv6Cidr)
+            put(Preferences.IPV6, prefs.ipv6)
+            put(Preferences.APPS, ArrayList(prefs.apps ?: emptySet()))
+            put(Preferences.TUN_ROUTES, prefs.tunRoutes)
+            put(Preferences.CONFIG_FILES_ORDER, prefs.configFilesOrder)
+            put(Preferences.DISABLE_VPN, prefs.disableVpn)
+            put(Preferences.CONNECTIVITY_TEST_TARGET, prefs.connectivityTestTarget)
+            put(Preferences.CONNECTIVITY_TEST_SOCKS_SERVER, prefs.connectivityTestSocksServer)
+            put(Preferences.CONNECTIVITY_TEST_TIMEOUT, prefs.connectivityTestTimeout)
+            put(Preferences.GEOIP_URL, prefs.geoipUrl)
+            put(Preferences.GEOSITE_URL, prefs.geositeUrl)
+            put(Preferences.BYPASS_SELECTED_APPS, prefs.bypassSelectedApps)
+            put(Preferences.HEV_SOCKS5_TUNNEL_CONFIG, prefs.hevSocks5TunnelConfig)
+        }
+    }
+
+    private fun restorePreferencesFromBackup(
+        preferencesMap: Map<String?, Any?>,
+        savedOrderFromBackup: MutableList<String>
+    ) {
+        getStringPreference(preferencesMap, Preferences.TUN_DNS_IPV4)?.let { prefs.tunDnsIpv4 = it }
+        getStringPreference(preferencesMap, Preferences.TUN_DNS_IPV6)?.let { prefs.tunDnsIpv6 = it }
+        getStringPreference(preferencesMap, Preferences.TUN_NAME)?.let { prefs.tunName = it }
+        getIntPreference(preferencesMap, Preferences.TUN_MTU, "TUN_MTU")?.let { prefs.tunMtu = it }
+        getStringPreference(preferencesMap, Preferences.TUN_IPV4_CIDR)?.let { prefs.tunIpv4Cidr = it }
+        getStringPreference(preferencesMap, Preferences.TUN_IPV6_CIDR)?.let { prefs.tunIpv6Cidr = it }
+        getBooleanPreference(preferencesMap, Preferences.IPV6)?.let { prefs.ipv6 = it }
+        getStringPreference(preferencesMap, Preferences.TUN_ROUTES)?.let { prefs.tunRoutes = it }
+        getStringListPreference(preferencesMap, Preferences.APPS, "APPS")?.let { prefs.apps = it.toSet() }
+        getBooleanPreference(preferencesMap, Preferences.DISABLE_VPN)?.let { prefs.disableVpn = it }
+        getStringPreference(preferencesMap, Preferences.CONNECTIVITY_TEST_TARGET)
+            ?.let { prefs.connectivityTestTarget = it }
+        getStringPreference(preferencesMap, Preferences.CONNECTIVITY_TEST_SOCKS_SERVER)
+            ?.let { prefs.connectivityTestSocksServer = it }
+        getIntPreference(
+            preferencesMap,
+            Preferences.CONNECTIVITY_TEST_TIMEOUT,
+            "CONNECTIVITY_TEST_TIMEOUT"
+        )?.let { prefs.connectivityTestTimeout = it }
+        getStringPreference(preferencesMap, Preferences.GEOIP_URL)?.let { prefs.geoipUrl = it }
+        getStringPreference(preferencesMap, Preferences.GEOSITE_URL)?.let { prefs.geositeUrl = it }
+        getBooleanPreference(preferencesMap, Preferences.BYPASS_SELECTED_APPS)
+            ?.let { prefs.bypassSelectedApps = it }
+        getStringPreference(preferencesMap, Preferences.HEV_SOCKS5_TUNNEL_CONFIG)
+            ?.let { prefs.hevSocks5TunnelConfig = it }
+
+        getStringListPreference(preferencesMap, Preferences.CONFIG_FILES_ORDER, "CONFIG_FILES_ORDER")
+            ?.let { savedOrderFromBackup.addAll(it) }
+    }
+
+    private fun getStringPreference(preferencesMap: Map<String?, Any?>, key: String): String? {
+        return preferencesMap[key] as? String
+    }
+
+    private fun getBooleanPreference(preferencesMap: Map<String?, Any?>, key: String): Boolean? {
+        return preferencesMap[key] as? Boolean
+    }
+
+    private fun getIntPreference(
+        preferencesMap: Map<String?, Any?>,
+        key: String,
+        label: String
+    ): Int? {
+        val value = preferencesMap[key] ?: return null
+        return when (value) {
+            is Number -> value.toInt()
+            is String -> value.toIntOrNull().also {
+                if (it == null) {
+                    Log.w(TAG, "Failed to parse $label as integer: $value")
+                }
+            }
+
+            else -> null
+        }
+    }
+
+    private fun getStringListPreference(
+        preferencesMap: Map<String?, Any?>,
+        key: String,
+        label: String
+    ): List<String>? {
+        val value = preferencesMap[key] ?: return null
+        if (value !is List<*>) {
+            Log.w(TAG, "$label preference is not a List: " + value.javaClass.name)
+            return null
+        }
+
+        val result = mutableListOf<String>()
+        value.forEach { item ->
+            when (item) {
+                is String -> result.add(item)
+                null -> Unit
+                else -> Log.w(TAG, "Skipping non-String item in $label list: " + item.javaClass.name)
+            }
+        }
+        return result
     }
 
     suspend fun renameConfigFile(oldFile: File, newFile: File, newContent: String): Boolean =
