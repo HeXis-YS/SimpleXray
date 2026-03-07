@@ -2,6 +2,7 @@ package com.simplexray.an.data.source
 
 import android.app.Application
 import android.net.Uri
+import android.text.format.Formatter
 import android.util.Log
 import com.simplexray.an.R
 import com.simplexray.an.prefs.Preferences
@@ -14,8 +15,6 @@ import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.log10
-import kotlin.math.pow
 
 class FileManager(private val application: Application, private val prefs: Preferences) {
     suspend fun createConfigFile(): String? {
@@ -122,23 +121,11 @@ class FileManager(private val application: Application, private val prefs: Prefe
             val lastModified = file.lastModified()
             val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
             val date = sdf.format(Date(lastModified))
-            val size = formatFileSize(file.length())
+            val size = Formatter.formatShortFileSize(application, file.length())
             "$date | $size"
         } else {
             application.getString(R.string.rule_file_missing)
         }
-    }
-
-    private fun formatFileSize(size: Long): String {
-        if (size <= 0) return "0 B"
-        val units = arrayOf("B", "KB", "MB", "GB", "TB")
-        val digitGroups = (log10(size.toDouble()) / log10(1024.0)).toInt()
-        return String.format(
-            Locale.getDefault(),
-            "%.1f %s",
-            size / 1024.0.pow(digitGroups.toDouble()),
-            units[digitGroups]
-        )
     }
 
     suspend fun renameConfigFile(oldFile: File, newFile: File, newContent: String): Boolean =
