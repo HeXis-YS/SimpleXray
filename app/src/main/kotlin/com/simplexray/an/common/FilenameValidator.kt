@@ -2,10 +2,9 @@ package com.simplexray.an.common
 
 import android.content.Context
 import com.simplexray.an.R
-import java.util.regex.Pattern
 
 object FilenameValidator {
-    private const val INVALID_CHARS_PATTERN = "[\\\\/:*?\"<>|]"
+    private val invalidCharsRegex = Regex("""[\\/:*?"<>|]""")
 
     fun validateFilename(context: Context, name: String): String? {
         val trimmedName = name.trim()
@@ -17,6 +16,6 @@ object FilenameValidator {
     }
 
     private fun isValidFilenameChars(filename: String): Boolean {
-        return !Pattern.compile(INVALID_CHARS_PATTERN).matcher(filename).find()
+        return !invalidCharsRegex.containsMatchIn(filename)
     }
 }

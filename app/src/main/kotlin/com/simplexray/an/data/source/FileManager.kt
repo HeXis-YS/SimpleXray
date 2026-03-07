@@ -22,11 +22,7 @@ class FileManager(private val application: Application, private val prefs: Prefe
             val filename = System.currentTimeMillis().toString() + ".json"
             val newFile = File(application.filesDir, filename)
             try {
-                val fileContent: String
-                fileContent = "{}"
-                FileOutputStream(newFile).use { fileOutputStream ->
-                    fileOutputStream.write(fileContent.toByteArray())
-                }
+                newFile.writeText("{}")
                 Log.d(TAG, "Created new config file: ${newFile.absolutePath}")
                 newFile.absolutePath
             } catch (e: IOException) {
@@ -53,15 +49,11 @@ class FileManager(private val application: Application, private val prefs: Prefe
             val targetFile = File(application.filesDir, filename)
             try {
                 application.contentResolver.openInputStream(uri).use { inputStream ->
+                    if (inputStream == null) {
+                        throw IOException("Failed to open input stream for URI: $uri")
+                    }
                     FileOutputStream(targetFile).use { outputStream ->
-                        if (inputStream == null) {
-                            throw IOException("Failed to open input stream for URI: $uri")
-                        }
-                        val buffer = ByteArray(1024)
-                        var read: Int
-                        while ((inputStream.read(buffer).also { read = it }) != -1) {
-                            outputStream.write(buffer, 0, read)
-                        }
+                        inputStream.copyTo(outputStream)
                         Log.d(TAG, "Successfully imported $filename from URI: $uri")
                         true
                     }

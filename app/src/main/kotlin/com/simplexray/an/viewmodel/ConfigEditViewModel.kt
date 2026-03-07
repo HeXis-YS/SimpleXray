@@ -70,15 +70,6 @@ class ConfigEditViewModel(
         }
     }
 
-    private val File.nameWithoutExtension: String
-        get() {
-            var name = this.name
-            if (name.endsWith(".json")) {
-                name = name.substring(0, name.length - ".json".length)
-            }
-            return name
-        }
-
     private suspend fun readConfigFileContent(): String = withContext(Dispatchers.IO) {
         if (!_configFile.exists()) {
             Log.e(TAG, "Config not found at path: $initialFilePath")
@@ -111,7 +102,7 @@ class ConfigEditViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val oldFilePath = _configFile.absolutePath
 
-            var newFilename = _filename.value.trim { it <= ' ' }
+            var newFilename = _filename.value.trim()
 
             val validationError = validateFilename(newFilename)
             if (validationError != null) {

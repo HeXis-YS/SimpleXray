@@ -2,13 +2,9 @@ package com.simplexray.an.data.source
 
 import android.content.Context
 import android.util.Log
-import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
-import java.io.FileReader
-import java.io.FileWriter
 import java.io.IOException
-import java.io.PrintWriter
 import java.io.RandomAccessFile
 
 class LogFileManager(
@@ -26,12 +22,8 @@ class LogFileManager(
     @Synchronized
     fun appendLog(logEntry: String?) {
         try {
-            FileWriter(logFile, true).use { fileWriter ->
-                PrintWriter(fileWriter).use { printWriter ->
-                    if (logEntry != null) {
-                        printWriter.println(logEntry)
-                    }
-                }
+            if (logEntry != null) {
+                logFile.appendText("$logEntry\n")
             }
         } catch (e: IOException) {
             Log.e(TAG, "Error appending log to file", e)
@@ -41,35 +33,24 @@ class LogFileManager(
     }
 
     fun readLogs(): String? {
-        val logContent = StringBuilder()
         if (!logFile.exists()) {
             Log.d(TAG, "Log file does not exist.")
             return ""
         }
         try {
-            FileReader(logFile).use { fileReader ->
-                BufferedReader(fileReader).use { bufferedReader ->
-                    var line: String?
-                    while (bufferedReader.readLine().also { line = it } != null) {
-                        logContent.append(line).append("\n")
-                    }
-                }
-            }
+            return logFile.readText()
         } catch (e: IOException) {
             Log.e(TAG, "Error reading log file", e)
             return null
         }
-        return logContent.toString()
     }
 
     @Synchronized
     fun clearLogs() {
         if (logFile.exists()) {
             try {
-                FileWriter(logFile, false).use { fileWriter ->
-                    fileWriter.write("")
-                    Log.d(TAG, "Log file content cleared successfully.")
-                }
+                logFile.writeText("")
+                Log.d(TAG, "Log file content cleared successfully.")
             } catch (e: IOException) {
                 Log.e(TAG, "Failed to clear log file content.", e)
             }

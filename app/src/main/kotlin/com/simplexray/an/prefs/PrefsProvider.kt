@@ -14,7 +14,8 @@ class PrefsProvider : ContentProvider() {
     private lateinit var prefs: SharedPreferences
 
     override fun onCreate(): Boolean {
-        prefs = PreferenceManager.getDefaultSharedPreferences(context!!)
+        val context = context ?: return false
+        prefs = PreferenceManager.getDefaultSharedPreferences(context)
         return true
     }
 
@@ -40,42 +41,14 @@ class PrefsProvider : ContentProvider() {
             )
         )
         if (key != null) {
-            var value: Any? = null
-            var type: String? = null
-            if (prefs.contains(key)) {
-                val valueAndType: Pair<Any?, String?>? = try {
-                    prefs.getString(key, null)?.let { v -> Pair<Any?, String?>(v, "String") }
-                } catch (e: ClassCastException) {
-                    null
-                } ?: try {
-                    Pair<Any?, String?>(prefs.getBoolean(key, false), "Boolean")
-                } catch (e: ClassCastException) {
-                    null
-                } ?: try {
-                    Pair<Any?, String?>(prefs.getInt(key, 0), "Integer")
-                } catch (e: ClassCastException) {
-                    null
-                } ?: try {
-                    Pair<Any?, String?>(prefs.getLong(key, 0L), "Long")
-                } catch (e: ClassCastException) {
-                    null
-                } ?: try {
-                    Pair<Any?, String?>(prefs.getFloat(key, 0f), "Float")
-                } catch (e: ClassCastException) {
-                    null
-                } ?: try {
-                    prefs.getStringSet(key, null)
-                        ?.let { v -> Pair<Any?, String?>(v, "StringSet") }
-                } catch (e: ClassCastException) {
-                    Log.w(TAG, "Error retrieving key '$key' as StringSet, giving up", e)
-                    null
-                }
-
-                value = valueAndType?.first
-                type = valueAndType?.second
-            }
+            val value = prefs.all[key]
             if (value != null) {
-                cursor.addRow(arrayOf<Any?>(key, value.toString(), type))
+                val type = getPrefType(value)
+                if (type != null) {
+                    cursor.addRow(arrayOf<Any?>(key, value.toString(), type))
+                } else {
+                    Log.w(TAG, "Unsupported preference value type for key '$key': ${value::class.java.name}")
+                }
             }
         }
         return cursor
@@ -153,6 +126,18 @@ class PrefsProvider : ContentProvider() {
             throw UnsupportedOperationException("Unknown uri for update: $uri")
         }
         return rowsAffected
+    }
+
+    private fun getPrefType(value: Any): String? {
+        return when (value) {
+            is String -> "String"
+            is Boolean -> "Boolean"
+            is Int -> "Integer"
+            is Long -> "Long"
+            is Float -> "Float"
+            is Set<*> -> if (value.all { it is String }) "StringSet" else null
+            else -> null
+        }
     }
 
     companion object {
