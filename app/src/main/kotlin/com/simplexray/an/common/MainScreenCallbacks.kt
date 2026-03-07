@@ -16,8 +16,6 @@ import java.io.File
 data class MainScreenCallbacks(
     val onCreateNewConfigFileAndEdit: () -> Unit,
     val onPerformExport: (LogViewModel) -> Unit,
-    val onPerformBackup: () -> Unit,
-    val onPerformRestore: () -> Unit,
     val onDeleteConfigClick: (File, () -> Unit) -> Unit,
     val onSwitchVpnService: () -> Unit
 )
@@ -76,21 +74,6 @@ fun rememberMainScreenCallbacks(
         }
     }
 
-    val onPerformBackup: () -> Unit = {
-        scope.launch {
-            mainViewModel.performBackup(launchers.createFileLauncher)
-        }
-    }
-
-    val onPerformRestore: () -> Unit = {
-        launchers.openFileLauncher.launch(
-            arrayOf(
-                "application/octet-stream",
-                "*/*"
-            )
-        )
-    }
-
     val onDeleteConfigClick: (File, () -> Unit) -> Unit = { file, callback ->
         scope.launch {
             mainViewModel.deleteConfigFile(file, callback)
@@ -115,8 +98,6 @@ fun rememberMainScreenCallbacks(
     return MainScreenCallbacks(
         onCreateNewConfigFileAndEdit = onCreateNewConfigFileAndEdit,
         onPerformExport = onPerformExport,
-        onPerformBackup = onPerformBackup,
-        onPerformRestore = onPerformRestore,
         onDeleteConfigClick = onDeleteConfigClick,
         onSwitchVpnService = onSwitchVpnService
     )

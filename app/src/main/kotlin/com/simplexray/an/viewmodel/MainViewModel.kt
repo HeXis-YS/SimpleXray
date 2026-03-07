@@ -25,7 +25,6 @@ import com.simplexray.an.common.ThemeMode
 import com.simplexray.an.data.source.FileManager
 import com.simplexray.an.prefs.Preferences
 import com.simplexray.an.service.TProxyService
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -67,8 +66,6 @@ sealed class MainViewUiEvent {
 class MainViewModel(application: Application) :
     AndroidViewModel(application) {
     val prefs: Preferences = Preferences(application)
-    private val activityScope: CoroutineScope = viewModelScope
-    private var pendingBackupData: ByteArray? = null
 
     private val fileManager: FileManager = FileManager(application, prefs)
 
@@ -215,61 +212,6 @@ class MainViewModel(application: Application) :
     fun setServiceEnabled(enabled: Boolean) {
         _isServiceEnabled.value = enabled
         prefs.enable = enabled
-    }
-
-    fun clearPendingBackupData() {
-        pendingBackupData = null
-    }
-
-    fun performBackup(createFileLauncher: ActivityResultLauncher<String>) {
-        activityScope.launch {
-            pendingBackupData = fileManager.buildBackupData()
-            val filename = "simplexray_backup_" + System.currentTimeMillis() + ".dat"
-            withContext(Dispatchers.Main) {
-                createFileLauncher.launch(filename)
-            }
-        }
-    }
-
-    suspend fun handleBackupFileCreationResult(uri: Uri) {
-        withContext(Dispatchers.IO) {
-            if (pendingBackupData != null) {
-                val dataToWrite: ByteArray = pendingBackupData as ByteArray
-                pendingBackupData = null
-                try {
-                    application.contentResolver.openOutputStream(uri).use { os ->
-                        if (os != null) {
-                            os.write(dataToWrite)
-                            Log.d(TAG, "Backup successful to: $uri")
-                            _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.backup_success)))
-                        } else {
-                            Log.e(TAG, "Failed to open output stream for backup URI: $uri")
-                            _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.backup_failed)))
-                        }
-                    }
-                } catch (e: IOException) {
-                    Log.e(TAG, "Error writing backup data to URI: $uri", e)
-                    _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.backup_failed)))
-                }
-            } else {
-                _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.backup_failed)))
-                Log.e(TAG, "Pending backup data is null in launcher callback.")
-            }
-        }
-    }
-
-    suspend fun startRestoreTask(uri: Uri) {
-        withContext(Dispatchers.IO) {
-            val success = fileManager.restoreFromBackup(uri)
-            if (success) {
-                updateSettingsState()
-                _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.restore_success)))
-                Log.d(TAG, "Restore successful.")
-                refreshConfigFileList()
-            } else {
-                _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.restore_failed)))
-            }
-        }
     }
 
     suspend fun createConfigFile(): String? {

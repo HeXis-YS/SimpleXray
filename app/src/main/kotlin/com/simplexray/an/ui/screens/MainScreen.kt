@@ -124,8 +124,6 @@ fun MainScreen(
             hevLogViewModel = hevLogViewModel,
             onCreateNewConfigFileAndEdit = callbacks.onCreateNewConfigFileAndEdit,
             onPerformExport = callbacks.onPerformExport,
-            onPerformBackup = callbacks.onPerformBackup,
-            onPerformRestore = callbacks.onPerformRestore,
             onSwitchVpnService = callbacks.onSwitchVpnService,
             xrayLogListState = xrayLogListState,
             hevLogListState = hevLogListState,

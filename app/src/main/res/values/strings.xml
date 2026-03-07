@@ -35,12 +35,6 @@
     <string name="import_failed">Import failed: No config found on clipboard</string>
     <string name="version">Version</string>
     <string name="kernel">Kernel</string>
-    <string name="backup">Backup</string>
-    <string name="restore">Restore</string>
-    <string name="backup_success">Backup successful</string>
-    <string name="backup_failed">Backup failed</string>
-    <string name="restore_failed">Restore failed</string>
-    <string name="restore_success">Restore successful</string>
     <string name="no_config_files">No configuration files</string>
     <string name="no_log_entries">No log entries</string>
     <string name="rule_file_missing">Download rule file</string>

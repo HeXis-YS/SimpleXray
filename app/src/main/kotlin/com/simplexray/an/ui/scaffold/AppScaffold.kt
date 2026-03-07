@@ -58,8 +58,6 @@ fun AppScaffold(
     hevLogViewModel: LogViewModel,
     onCreateNewConfigFileAndEdit: () -> Unit,
     onPerformExport: (LogViewModel) -> Unit,
-    onPerformBackup: () -> Unit,
-    onPerformRestore: () -> Unit,
     onSwitchVpnService: () -> Unit,
     xrayLogListState: LazyListState,
     hevLogListState: LazyListState,
@@ -97,8 +95,6 @@ fun AppScaffold(
                 currentRoute,
                 onCreateNewConfigFileAndEdit,
                 onPerformExport,
-                onPerformBackup,
-                onPerformRestore,
                 onSwitchVpnService,
                 mainViewModel.controlMenuClickable.collectAsState().value,
                 mainViewModel.isServiceEnabled.collectAsState().value,
@@ -132,8 +128,6 @@ fun AppTopAppBar(
     currentRoute: String?,
     onCreateNewConfigFileAndEdit: () -> Unit,
     onPerformExport: (LogViewModel) -> Unit,
-    onPerformBackup: () -> Unit,
-    onPerformRestore: () -> Unit,
     onSwitchVpnService: () -> Unit,
     controlMenuClickable: Boolean,
     isServiceEnabled: Boolean,
@@ -243,8 +237,6 @@ fun AppTopAppBar(
                     currentRoute = currentRoute,
                     onCreateNewConfigFileAndEdit = onCreateNewConfigFileAndEdit,
                     onPerformExport = onPerformExport,
-                    onPerformBackup = onPerformBackup,
-                    onPerformRestore = onPerformRestore,
                     onSwitchVpnService = onSwitchVpnService,
                     controlMenuClickable = controlMenuClickable,
                     isServiceEnabled = isServiceEnabled,
@@ -263,8 +255,6 @@ private fun TopAppBarActions(
     currentRoute: String?,
     onCreateNewConfigFileAndEdit: () -> Unit,
     onPerformExport: (LogViewModel) -> Unit,
-    onPerformBackup: () -> Unit,
-    onPerformRestore: () -> Unit,
     onSwitchVpnService: () -> Unit,
     controlMenuClickable: Boolean,
     isServiceEnabled: Boolean,
@@ -288,11 +278,6 @@ private fun TopAppBarActions(
                 onLogSearchingChange = onLogSearchingChange
             )
         }
-
-        ROUTE_SETTINGS -> SettingsActions(
-            onPerformBackup = onPerformBackup,
-            onPerformRestore = onPerformRestore
-        )
     }
 }
 
@@ -380,41 +365,6 @@ private fun LogActions(
                 expanded = false
             },
             enabled = hasLogsToExport
-        )
-    }
-}
-
-@Composable
-private fun SettingsActions(
-    onPerformBackup: () -> Unit,
-    onPerformRestore: () -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    IconButton(onClick = { expanded = true }) {
-        Icon(
-            Icons.Default.MoreVert,
-            contentDescription = stringResource(R.string.more)
-        )
-    }
-
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false }
-    ) {
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.backup)) },
-            onClick = {
-                onPerformBackup()
-                expanded = false
-            }
-        )
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.restore)) },
-            onClick = {
-                onPerformRestore()
-                expanded = false
-            }
         )
     }
 }
