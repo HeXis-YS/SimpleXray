@@ -148,10 +148,11 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
         if (clipData != null && clipData.itemCount > 0) {
             val importString = clipData.getItemAt(0).text?.toString()
             if (!importString.isNullOrBlank()) {
-                val lines = importString.split("\n")
-                lines.indexOf(BuildConfig.APPLICATION_ID).let {
-                    if (it > -1) lines.drop(it)
-                }
+                val lines = importString.lineSequence()
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .filterNot { it == BuildConfig.APPLICATION_ID }
+                    .toList()
                 if (lines.isNotEmpty()) {
                     val newBypassMode = lines[0].toBooleanStrictOrNull()
                     if (newBypassMode != null) {
@@ -182,10 +183,10 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
     private fun saveChanges() {
         if (_isChanged) {
             viewModelScope.launch(Dispatchers.IO) {
-                val apps: MutableSet<String> = HashSet()
-                packageList.forEach { pkg ->
-                    if (pkg.selected) apps.add(pkg.packageName)
-                }
+                val apps = packageList.asSequence()
+                    .filter { it.selected }
+                    .map { it.packageName }
+                    .toSet()
                 prefs.apps = apps
                 _isChanged = false
             }

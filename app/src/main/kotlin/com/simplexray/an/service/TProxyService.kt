@@ -26,12 +26,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStreamReader
 import java.io.InterruptedIOException
 import java.util.regex.Pattern
 import kotlin.concurrent.Volatile
@@ -169,26 +165,21 @@ class TProxyService : VpnService() {
 
             Log.d(TAG, "Writing config to xray stdin from: $selectedConfigPath")
             currentProcess.outputStream.use { os ->
-                FileInputStream(selectedConfigPath).use { fis ->
-                    val buffer = ByteArray(4096)
-                    var bytesRead: Int
-                    while (fis.read(buffer).also { bytesRead = it } != -1) {
-                        os.write(buffer, 0, bytesRead)
-                    }
+                File(selectedConfigPath).inputStream().use { input ->
+                    input.copyTo(os)
                 }
                 os.flush()
             }
 
-            val inputStream = currentProcess.inputStream
-            val reader = BufferedReader(InputStreamReader(inputStream))
-            var line: String
             Log.d(TAG, "Reading xray process output.")
-            while ((reader.readLine().also { line = it }) != null) {
-                xrayLogFileManager.appendLog(line)
-                synchronized(logBroadcastBuffer) {
-                    logBroadcastBuffer.add(line)
-                    if (!handler.hasCallbacks(broadcastLogsRunnable)) {
-                        handler.postDelayed(broadcastLogsRunnable, BROADCAST_DELAY_MS)
+            currentProcess.inputStream.bufferedReader().useLines { lines ->
+                lines.forEach { line ->
+                    xrayLogFileManager.appendLog(line)
+                    synchronized(logBroadcastBuffer) {
+                        logBroadcastBuffer.add(line)
+                        if (!handler.hasCallbacks(broadcastLogsRunnable)) {
+                            handler.postDelayed(broadcastLogsRunnable, BROADCAST_DELAY_MS)
+                        }
                     }
                 }
             }
@@ -275,10 +266,8 @@ class TProxyService : VpnService() {
         val tproxyFile = File(cacheDir, "tproxy.conf")
         try {
             tproxyFile.createNewFile()
-            FileOutputStream(tproxyFile, false).use { fos ->
-                val tproxyConf = getTproxyConf(prefs)
-                fos.write(tproxyConf.toByteArray())
-            }
+            val tproxyConf = getTproxyConf(prefs)
+            tproxyFile.writeText(tproxyConf)
         } catch (e: IOException) {
             Log.e(TAG, e.toString())
             stopXray()

@@ -28,7 +28,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.util.Collections
 
 private const val TAG = "LogViewModel"
 
@@ -55,7 +54,7 @@ class LogViewModel(
     private val _hasLogsToExport = MutableStateFlow(false)
     val hasLogsToExport: StateFlow<Boolean> = _hasLogsToExport.asStateFlow()
 
-    private val logEntrySet: MutableSet<String> = Collections.synchronizedSet(HashSet())
+    private val logEntrySet: MutableSet<String> = mutableSetOf()
     private val logMutex = Mutex()
 
     private var logUpdateReceiver: BroadcastReceiver? = null
@@ -156,11 +155,11 @@ class LogViewModel(
     private suspend fun loadLogsInternal() {
         Log.d(TAG, "Loading logs.")
         val savedLogData = logFileManager.readLogs()
-        val initialLogs = if (!savedLogData.isNullOrEmpty()) {
-            savedLogData.split("\n").filter { it.trim().isNotEmpty() }
-        } else {
-            emptyList()
-        }
+        val initialLogs = savedLogData
+            ?.lineSequence()
+            ?.filter { it.isNotBlank() }
+            ?.toList()
+            ?: emptyList()
         lastKnownLogFileLength = if (logFileManager.logFile.exists()) {
             logFileManager.logFile.length()
         } else {
@@ -179,7 +178,7 @@ class LogViewModel(
 
     private suspend fun processNewLogs(newLogs: ArrayList<String>) {
         val uniqueNewLogs = logMutex.withLock {
-            newLogs.filter { it.trim().isNotEmpty() && logEntrySet.add(it) }
+            newLogs.filter { it.isNotBlank() && logEntrySet.add(it) }
         }
         if (uniqueNewLogs.isNotEmpty()) {
             withContext(Dispatchers.Main) {

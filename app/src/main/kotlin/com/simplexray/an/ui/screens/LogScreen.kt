@@ -102,7 +102,7 @@ fun LogEntryItem(logEntry: String) {
             var endIndex = 0
             while (endIndex < logEntry.length) {
                 val c = logEntry[endIndex]
-                if (Character.isDigit(c) || c == '/' || c == ' ' || c == ':' || c == '.') {
+                if (c.isDigit() || c == '/' || c == ' ' || c == ':' || c == '.') {
                     endIndex++
                 } else {
                     break

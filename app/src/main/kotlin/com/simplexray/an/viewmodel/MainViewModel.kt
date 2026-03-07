@@ -42,10 +42,8 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
-import java.io.InputStreamReader
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.net.Socket
@@ -187,8 +185,7 @@ class MainViewModel(application: Application) :
         val xrayPath = "$libraryDir/libxray.so"
         try {
             val process = Runtime.getRuntime().exec("$xrayPath -version")
-            val reader = BufferedReader(InputStreamReader(process.inputStream))
-            val firstLine = reader.readLine()
+            val firstLine = process.inputStream.bufferedReader().use { it.readLine() }
             process.destroy()
             _settingsState.value = _settingsState.value.copy(
                 info = _settingsState.value.info.copy(
