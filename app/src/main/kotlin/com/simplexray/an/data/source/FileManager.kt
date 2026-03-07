@@ -257,8 +257,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
                         prefs.tunIpv6Cidr = value
                     }
 
-                    restoreLegacyTunDns(preferencesMap)
-
                     value = preferencesMap[Preferences.IPV6]
                     if (value is Boolean) {
                         prefs.ipv6 = (value as Boolean?)!!
@@ -591,45 +589,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
             size / 1024.0.pow(digitGroups.toDouble()),
             units[digitGroups]
         )
-    }
-
-    private fun splitDnsList(value: String): List<String> {
-        return value.split(',').map { it.trim() }.filter { it.isNotEmpty() }
-    }
-
-    private fun restoreLegacyTunDns(preferencesMap: Map<String?, Any?>) {
-        val hasTunDnsIpv4 = preferencesMap[Preferences.TUN_DNS_IPV4] is String
-        val hasTunDnsIpv6 = preferencesMap[Preferences.TUN_DNS_IPV6] is String
-
-        if (!hasTunDnsIpv4 || !hasTunDnsIpv6) {
-            val legacyCombined = preferencesMap[Preferences.TUN_DNS] as? String
-            val splitDns = splitDnsList(legacyCombined.orEmpty())
-            if (!hasTunDnsIpv4) {
-                val migratedIpv4 = splitDns.filterNot { it.contains(':') }.joinToString(",")
-                if (migratedIpv4.isNotEmpty()) {
-                    prefs.tunDnsIpv4 = migratedIpv4
-                }
-            }
-            if (!hasTunDnsIpv6) {
-                val migratedIpv6 = splitDns.filter { it.contains(':') }.joinToString(",")
-                if (migratedIpv6.isNotEmpty()) {
-                    prefs.tunDnsIpv6 = migratedIpv6
-                }
-            }
-        }
-
-        if (!hasTunDnsIpv4) {
-            val legacyIpv4 = (preferencesMap[Preferences.DNS_IPV4] as? String)?.trim().orEmpty()
-            if (legacyIpv4.isNotEmpty()) {
-                prefs.tunDnsIpv4 = legacyIpv4
-            }
-        }
-        if (!hasTunDnsIpv6) {
-            val legacyIpv6 = (preferencesMap[Preferences.DNS_IPV6] as? String)?.trim().orEmpty()
-            if (legacyIpv6.isNotEmpty()) {
-                prefs.tunDnsIpv6 = legacyIpv6
-            }
-        }
     }
 
     suspend fun renameConfigFile(oldFile: File, newFile: File, newContent: String): Boolean =

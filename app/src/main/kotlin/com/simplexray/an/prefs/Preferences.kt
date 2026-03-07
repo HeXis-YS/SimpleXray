@@ -63,31 +63,6 @@ class Preferences(context: Context) {
         return value
     }
 
-    private fun splitDnsList(value: String): List<String> {
-        return value.split(',').map { it.trim() }.filter { it.isNotEmpty() }
-    }
-
-    private fun getTunDnsPref(
-        key: String,
-        defaultValue: String,
-        legacyKey: String,
-        isIpv6: Boolean
-    ): String {
-        val value = getPrefData(key).first
-        if (!value.isNullOrBlank()) {
-            return value
-        }
-
-        val legacyCombined = splitDnsList(getPrefData(TUN_DNS).first.orEmpty())
-        val combinedFallback = legacyCombined
-            .filter { if (isIpv6) it.contains(':') else !it.contains(':') }
-            .joinToString(",")
-        val legacyValue = getPrefData(legacyKey).first?.trim().orEmpty()
-        val fallback = combinedFallback.ifEmpty { legacyValue.ifEmpty { defaultValue } }
-        setValueInProvider(key, fallback)
-        return fallback
-    }
-
     private fun setValueInProvider(key: String, value: Any?) {
         val uri = PrefsContract.PrefsEntry.CONTENT_URI.buildUpon().appendPath(key).build()
         val values = ContentValues()
@@ -131,13 +106,13 @@ class Preferences(context: Context) {
     }
 
     var tunDnsIpv4: String
-        get() = getTunDnsPref(TUN_DNS_IPV4, DEFAULT_TUN_DNS_IPV4, DNS_IPV4, isIpv6 = false)
+        get() = getNonBlankStringPref(TUN_DNS_IPV4, DEFAULT_TUN_DNS_IPV4)
         set(value) {
             setValueInProvider(TUN_DNS_IPV4, value)
         }
 
     var tunDnsIpv6: String
-        get() = getTunDnsPref(TUN_DNS_IPV6, DEFAULT_TUN_DNS_IPV6, DNS_IPV6, isIpv6 = true)
+        get() = getNonBlankStringPref(TUN_DNS_IPV6, DEFAULT_TUN_DNS_IPV6)
         set(value) {
             setValueInProvider(TUN_DNS_IPV6, value)
         }
@@ -333,15 +308,10 @@ class Preferences(context: Context) {
         const val DEFAULT_CONNECTIVITY_TEST_TIMEOUT: Int = 3000
         const val TUN_DNS_IPV4: String = "TunDnsIpv4"
         const val TUN_DNS_IPV6: String = "TunDnsIpv6"
-        // Legacy key retained for backward compatibility with older combined DNS setting.
-        const val TUN_DNS: String = "TunDns"
         const val TUN_NAME: String = "TunName"
         const val TUN_MTU: String = "TunMtu"
         const val TUN_IPV4_CIDR: String = "TunIpv4Cidr"
         const val TUN_IPV6_CIDR: String = "TunIpv6Cidr"
-        // Legacy keys retained for backward compatibility with older backups.
-        const val DNS_IPV4: String = "DnsIpv4"
-        const val DNS_IPV6: String = "DnsIpv6"
         const val IPV6: String = "Ipv6"
         const val APPS: String = "Apps"
         const val ENABLE: String = "Enable"
