@@ -90,8 +90,6 @@ class FileManager(private val application: Application, private val prefs: Prefe
             try {
                 val gson = Gson()
                 val preferencesMap: MutableMap<String, Any> = mutableMapOf()
-                preferencesMap[Preferences.SOCKS_ADDR] = prefs.socksAddress
-                preferencesMap[Preferences.SOCKS_PORT] = prefs.socksPort
                 preferencesMap[Preferences.TUN_DNS_IPV4] = prefs.tunDnsIpv4
                 preferencesMap[Preferences.TUN_DNS_IPV6] = prefs.tunDnsIpv6
                 preferencesMap[Preferences.TUN_NAME] = prefs.tunName
@@ -223,18 +221,7 @@ class FileManager(private val application: Application, private val prefs: Prefe
                 val savedOrderFromBackup = mutableListOf<String>()
 
                 if (preferencesMap != null) {
-                    var value = preferencesMap[Preferences.SOCKS_PORT]
-                    if (value is Number) {
-                        prefs.socksPort = value.toInt()
-                    } else if (value is String) {
-                        try {
-                            prefs.socksPort = value.toInt()
-                        } catch (ignore: NumberFormatException) {
-                            Log.w(TAG, "Failed to parse SOCKS_PORT as integer: $value")
-                        }
-                    }
-
-                    value = preferencesMap[Preferences.TUN_DNS_IPV4]
+                    var value = preferencesMap[Preferences.TUN_DNS_IPV4]
                     if (value is String) {
                         prefs.tunDnsIpv4 = value
                     }

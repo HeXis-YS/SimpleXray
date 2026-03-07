@@ -130,26 +130,6 @@ class Preferences(context: Context) {
         }
     }
 
-    val socksAddress: String
-        get() = getPrefData(SOCKS_ADDR).first ?: "::1"
-
-    var socksPort: Int
-        get() {
-            val value = getPrefData(SOCKS_PORT).first
-            val port = value?.toIntOrNull()
-            if (port != null && port in 1025..65535) {
-                return port
-            }
-            if (!value.isNullOrEmpty()) {
-                Log.e(TAG, "Failed to parse SocksPort as Integer: $value")
-            }
-            setValueInProvider(SOCKS_PORT, DEFAULT_SOCKS_PORT.toString())
-            return DEFAULT_SOCKS_PORT
-        }
-        set(port) {
-            setValueInProvider(SOCKS_PORT, port.toString())
-        }
-
     var tunDnsIpv4: String
         get() = getTunDnsPref(TUN_DNS_IPV4, DEFAULT_TUN_DNS_IPV4, DNS_IPV4, isIpv6 = false)
         set(value) {
@@ -197,22 +177,10 @@ class Preferences(context: Context) {
             setValueInProvider(TUN_IPV6_CIDR, value)
         }
 
-    var ipv4: Boolean
-        get() = getBooleanPref(IPV4, true)
-        set(enable) {
-            setValueInProvider(IPV4, enable)
-        }
-
     var ipv6: Boolean
         get() = getBooleanPref(IPV6, false)
         set(enable) {
             setValueInProvider(IPV6, enable)
-        }
-
-    var global: Boolean
-        get() = getBooleanPref(GLOBAL, false)
-        set(enable) {
-            setValueInProvider(GLOBAL, enable)
         }
 
     var apps: Set<String?>?
@@ -363,8 +331,6 @@ class Preferences(context: Context) {
         const val DEFAULT_TUN_IPV6_CIDR: String = "fc00::1/128"
         const val DEFAULT_CONNECTIVITY_TEST_SOCKS_SERVER: String = "127.0.0.1:10809"
         const val DEFAULT_CONNECTIVITY_TEST_TIMEOUT: Int = 3000
-        const val SOCKS_ADDR: String = "SocksAddr"
-        const val SOCKS_PORT: String = "SocksPort"
         const val TUN_DNS_IPV4: String = "TunDnsIpv4"
         const val TUN_DNS_IPV6: String = "TunDnsIpv6"
         // Legacy key retained for backward compatibility with older combined DNS setting.
@@ -376,9 +342,7 @@ class Preferences(context: Context) {
         // Legacy keys retained for backward compatibility with older backups.
         const val DNS_IPV4: String = "DnsIpv4"
         const val DNS_IPV6: String = "DnsIpv6"
-        const val IPV4: String = "Ipv4"
         const val IPV6: String = "Ipv6"
-        const val GLOBAL: String = "Global"
         const val APPS: String = "Apps"
         const val ENABLE: String = "Enable"
         const val SELECTED_CONFIG_PATH: String = "SelectedConfigPath"

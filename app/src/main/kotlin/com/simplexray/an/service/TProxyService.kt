@@ -305,25 +305,23 @@ class TProxyService : VpnService() {
         setSession(prefs.tunName)
         setMtu(prefs.tunMtu)
 
-        if (prefs.ipv4) {
-            val ipv4Cidr = parseTunIpv4Cidr(prefs.tunIpv4Cidr)
-                ?: parseTunIpv4Cidr(Preferences.DEFAULT_TUN_IPV4_CIDR)
-            ipv4Cidr?.let { (address, prefix) ->
-                addAddress(address, prefix)
-            }
-            val routeSpec = parseTunRoutes(prefs.tunRoutes)
-                ?: parseTunRoutes(resources.getStringArray(R.array.default_tun_routes).joinToString("\n"))
-                ?: emptyList()
-            for ((address, prefix) in routeSpec) {
-                addRoute(address, prefix)
-            }
+        val ipv4Cidr = parseTunIpv4Cidr(prefs.tunIpv4Cidr)
+            ?: parseTunIpv4Cidr(Preferences.DEFAULT_TUN_IPV4_CIDR)
+        ipv4Cidr?.let { (address, prefix) ->
+            addAddress(address, prefix)
+        }
+        val routeSpec = parseTunRoutes(prefs.tunRoutes)
+            ?: parseTunRoutes(resources.getStringArray(R.array.default_tun_routes).joinToString("\n"))
+            ?: emptyList()
+        for ((address, prefix) in routeSpec) {
+            addRoute(address, prefix)
+        }
 
-            val dnsIpv4Servers = parseTunDnsServers(prefs.tunDnsIpv4, IPV4_PATTERN)
-                ?: parseTunDnsServers(Preferences.DEFAULT_TUN_DNS_IPV4, IPV4_PATTERN)
-                ?: emptyList()
-            for (server in dnsIpv4Servers) {
-                addDnsServer(server)
-            }
+        val dnsIpv4Servers = parseTunDnsServers(prefs.tunDnsIpv4, IPV4_PATTERN)
+            ?: parseTunDnsServers(Preferences.DEFAULT_TUN_DNS_IPV4, IPV4_PATTERN)
+            ?: emptyList()
+        for (server in dnsIpv4Servers) {
+            addDnsServer(server)
         }
         if (prefs.ipv6) {
             val ipv6Cidr = parseTunIpv6Cidr(prefs.tunIpv6Cidr)
