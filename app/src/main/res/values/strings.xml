@@ -99,5 +99,5 @@
     <string name="invalid_tun_ipv4_cidr">Invalid IPv4 address format (example: 192.0.0.8/32)</string>
     <string name="invalid_tun_ipv6_cidr">Invalid IPv6 address format (example: fc00::1/128)</string>
     <string name="hev_socks5_tunnel_config_title">hev-socks5-tunnel config</string>
-    <string name="hev_socks5_tunnel_config_empty">Tap to edit custom YAML</string>
+    <string name="hev_socks5_tunnel_config_preview_hint">Tap to edit custom YAML</string>
 </resources>

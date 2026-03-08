@@ -96,12 +96,7 @@ fun SettingsScreen(
         tunRoutesList.size,
         tunRoutesList.size
     )
-    val hevSocks5TunnelConfigPreview = settingsState.hevSocks5TunnelConfig.value
-        .lineSequence()
-        .firstOrNull { it.isNotBlank() }
-        ?.trim()
-        ?.take(80)
-        ?: stringResource(R.string.hev_socks5_tunnel_config_empty)
+    val hevSocks5TunnelConfigPreview = stringResource(R.string.hev_socks5_tunnel_config_preview_hint)
 
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
