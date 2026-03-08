@@ -1,52 +1,53 @@
+import com.android.build.api.variant.FilterConfiguration
+
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.plugin.compose' version "${kotlin_version}"
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.3.10'
 }
 
 def versionProps = new Properties()
 file("$rootDir/version.properties").withInputStream { versionProps.load(it) }
 
 android {
-    namespace "com.simplexray.an"
-    compileSdk 36
+    namespace = "com.simplexray.an"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId "com.simplexray.an"
-        versionCode versionProps.APP_VERSION_CODE.toInteger()
-        versionName versionProps.APP_VERSION_NAME
+        applicationId = "com.simplexray.an"
+        versionCode = versionProps.APP_VERSION_CODE.toInteger()
+        versionName = versionProps.APP_VERSION_NAME
         externalNativeBuild {
             ndkBuild {
                 arguments "APP_CFLAGS+=-DPKGNAME=com/simplexray/an/service -ffile-prefix-map=${rootDir}=."
                 arguments "APP_LDFLAGS+=-Wl,--build-id=none"
             }
         }
-        targetSdk 35
-        minSdk 29
+        targetSdk = 35
+        minSdk = 29
     }
 
     signingConfigs {
         release {
-            enableV1Signing false
-            enableV2Signing false
-            enableV3Signing true
+            enableV1Signing = false
+            enableV2Signing = false
+            enableV3Signing = true
         }
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
-            signingConfig signingConfigs.release
+            minifyEnabled = true
+            shrinkResources = true
+            signingConfig = signingConfigs.release
             proguardFiles(
                     getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro'
             )
         }
         debug {
-            minifyEnabled false
-            signingConfig signingConfigs.release
-            debuggable true
+            minifyEnabled = false
+            signingConfig = signingConfigs.release
+            debuggable = true
         }
     }
 
@@ -68,20 +69,20 @@ android {
 
     externalNativeBuild {
         ndkBuild {
-            path "src/main/jni/Android.mk"
+            path = file("src/main/jni/Android.mk")
         }
     }
 
-    lintOptions {
-        checkReleaseBuilds false
+    lint {
+        checkReleaseBuilds = false
         // Or, if you prefer, you can continue to check for errors in release builds,
         // but continue the build even when errors are found:
-        abortOnError false
+        abortOnError = false
     }
 
-    packagingOptions {
+    packaging {
         jniLibs {
-            useLegacyPackaging true
+            useLegacyPackaging = true
         }
     }
 
@@ -91,38 +92,38 @@ android {
         // Disables dependency metadata when building Android App Bundles.
         includeInBundle = false
     }
-    ndkVersion versionProps.NDK_VERSION
+    ndkVersion = versionProps.NDK_VERSION
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = '17'
-    }
-
     splits {
         abi {
-            enable true
+            enable = true
             reset()
             include "arm64-v8a"
-            universalApk false
-        }
-    }
-
-    applicationVariants.configureEach { variant ->
-        variant.outputs.each { output ->
-            def abiFilter = output.getFilter("ABI")
-            if (abiFilter != null) {
-                output.outputFileName = "simplexray-${abiFilter}.apk"
-            } else {
-                output.outputFileName = "simplexray-universal.apk"
-            }
+            universalApk = false
         }
     }
 
     buildFeatures {
-        compose true
-        buildConfig true
+        compose = true
+        buildConfig = true
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.outputs.each { output ->
+            def abiFilter = output.filters.find {
+                it.filterType == FilterConfiguration.FilterType.ABI
+            }?.identifier
+            if (abiFilter != null) {
+                output.outputFileName.set("simplexray-${abiFilter}.apk")
+            } else {
+                output.outputFileName.set("simplexray-universal.apk")
+            }
+        }
     }
 }
 
@@ -130,7 +131,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'com.google.code.gson:gson:2.13.2'
     implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'androidx.core:core-ktx:1.16.0'
+    implementation 'androidx.core:core-ktx:1.17.0'
 
     implementation platform('androidx.compose:compose-bom:2026.02.01')
     implementation 'androidx.compose.ui:ui'
@@ -138,7 +139,7 @@ dependencies {
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.material:material-icons-extended'
     implementation 'androidx.compose.ui:ui-tooling-preview-android'
-    implementation 'androidx.activity:activity-compose'
+    implementation 'androidx.activity:activity-compose:1.12.4'
     implementation 'androidx.compose.runtime:runtime-livedata'
     implementation 'androidx.navigation:navigation-compose-android:2.9.7'
 
