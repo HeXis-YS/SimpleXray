@@ -29,7 +29,7 @@ fun rememberMainScreenLaunchers(mainViewModel: MainViewModel): MainScreenLaunche
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             mainViewModel.setControlMenuClickable(true)
             mainViewModel.setServiceEnabled(true)
-            mainViewModel.startTProxyService(TProxyService.ACTION_CONNECT)
+            mainViewModel.startTProxyService(TProxyService.ACTION_CONNECT_VPN)
         } else {
             mainViewModel.setControlMenuClickable(true)
         }

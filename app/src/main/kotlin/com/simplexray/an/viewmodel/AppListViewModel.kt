@@ -66,7 +66,7 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
         isLoading = true
         val pm = getApplication<Application>().packageManager
         val appPackageName = getApplication<Application>().packageName
-        val apps = prefs.apps ?: emptySet()
+        val selectedApps = prefs.selectedApps ?: emptySet()
         var loadedPackages = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
         val startTime = System.currentTimeMillis()
         viewModelScope.launch(Dispatchers.IO) {
@@ -87,7 +87,7 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
                     val label = appInfo.loadLabel(pm).toString()
                     val icon = appInfo.loadIcon(pm) ?: pm.defaultActivityIcon
                     Package(
-                        selected = apps.contains(it.packageName),
+                        selected = selectedApps.contains(it.packageName),
                         label = label,
                         icon = icon,
                         packageName = it.packageName,
@@ -183,11 +183,11 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
     private fun saveChanges() {
         if (_isChanged) {
             viewModelScope.launch(Dispatchers.IO) {
-                val apps = packageList.asSequence()
+                val selectedApps = packageList.asSequence()
                     .filter { it.selected }
                     .map { it.packageName }
                     .toSet()
-                prefs.apps = apps
+                prefs.selectedApps = selectedApps
                 _isChanged = false
             }
         }

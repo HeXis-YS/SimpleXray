@@ -147,7 +147,7 @@ class TProxyService : VpnService() {
     }
 
     private fun startXray() {
-        startService()
+        startVpnTunnel()
         serviceScope.launch { runXrayProcess() }
     }
 
@@ -161,7 +161,7 @@ class TProxyService : VpnService() {
             if (selectedConfigPath == null || !File(selectedConfigPath).exists()) return
             val xrayPath = "$libraryDir/libxray.so"
 
-            val processBuilder = getProcessBuilder(xrayPath)
+            val processBuilder = buildXrayProcessBuilder(xrayPath)
             currentProcess = processBuilder.start()
             this.xrayProcess = currentProcess
 
@@ -207,7 +207,7 @@ class TProxyService : VpnService() {
         }
     }
 
-    private fun getProcessBuilder(xrayPath: String): ProcessBuilder {
+    private fun buildXrayProcessBuilder(xrayPath: String): ProcessBuilder {
         val filesDir = applicationContext.filesDir
         val command: MutableList<String> = mutableListOf(xrayPath)
         val processBuilder = ProcessBuilder(command)
@@ -218,7 +218,7 @@ class TProxyService : VpnService() {
         return processBuilder
     }
 
-    private fun getTproxyConf(prefs: Preferences): String {
+    private fun buildHevTunnelConfig(prefs: Preferences): String {
         val hevLogFilePath = File(filesDir, LogFileManager.HEV_LOG_FILE_NAME).absolutePath
         val configured = prefs.hevSocks5TunnelConfig
             .replace(Preferences.HEV_LOG_FILE_PLACEHOLDER, hevLogFilePath)
@@ -252,11 +252,11 @@ class TProxyService : VpnService() {
         xrayProcess = null
         Log.d(TAG, "xrayProcess reference nulled.")
 
-        Log.d(TAG, "Calling stopService (stopping VPN).")
-        stopService()
+        Log.d(TAG, "Stopping VPN tunnel.")
+        stopVpnTunnel()
     }
 
-    private fun startService() {
+    private fun startVpnTunnel() {
         if (tunFd != null) return
         val prefs = Preferences(this)
         val builder = getVpnBuilder(prefs)
@@ -268,7 +268,7 @@ class TProxyService : VpnService() {
         val tproxyFile = File(cacheDir, "tproxy.conf")
         try {
             tproxyFile.createNewFile()
-            val tproxyConf = getTproxyConf(prefs)
+            val tproxyConf = buildHevTunnelConfig(prefs)
             tproxyFile.writeText(tproxyConf)
         } catch (e: IOException) {
             Log.e(TAG, e.toString())
@@ -301,16 +301,16 @@ class TProxyService : VpnService() {
         ipv4Cidr?.let { (address, prefix) ->
             addAddress(address, prefix)
         }
-        val routeSpec = parseTunRoutes(prefs.tunRoutes)
-            ?: parseTunRoutes(resources.getStringArray(R.array.default_tun_routes).joinToString("\n"))
+        val excludedIpv4Routes = parseExcludedIpv4Routes(prefs.excludedRoutes)
+            ?: parseExcludedIpv4Routes(resources.getStringArray(R.array.default_tun_routes).joinToString("\n"))
             ?: emptyList()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             addRoute("0.0.0.0", 0)
-            for ((address, prefix) in routeSpec) {
+            for ((address, prefix) in excludedIpv4Routes) {
                 excludeRoute(IpPrefix(InetAddress.getByName(address), prefix))
             }
         } else {
-            for ((address, prefix) in computeComplementIpv4Routes(routeSpec)) {
+            for ((address, prefix) in computeComplementIpv4Routes(excludedIpv4Routes)) {
                 addRoute(address, prefix)
             }
         }
@@ -337,7 +337,7 @@ class TProxyService : VpnService() {
             }
         }
 
-        prefs.apps?.forEach { appName ->
+        prefs.selectedApps?.forEach { appName ->
             appName?.let { name ->
                 try {
                     when {
@@ -348,11 +348,11 @@ class TProxyService : VpnService() {
                 }
             }
         }
-        if (prefs.bypassSelectedApps || prefs.apps.isNullOrEmpty())
+        if (prefs.bypassSelectedApps || prefs.selectedApps.isNullOrEmpty())
             addDisallowedApplication(BuildConfig.APPLICATION_ID)
     }
 
-    private fun stopService() {
+    private fun stopVpnTunnel() {
         tunFd?.let {
             try {
                 it.close()
@@ -363,7 +363,7 @@ class TProxyService : VpnService() {
             stopForeground(Service.STOP_FOREGROUND_REMOVE)
             TProxyStopService()
         }
-        exit()
+        broadcastStopAndStopSelf()
     }
 
     @Suppress("SameParameterValue")
@@ -382,7 +382,7 @@ class TProxyService : VpnService() {
         }
     }
 
-    private fun exit() {
+    private fun broadcastStopAndStopSelf() {
         val stopIntent = Intent(ACTION_STOP)
         stopIntent.setPackage(application.packageName)
         sendBroadcast(stopIntent)
@@ -398,14 +398,14 @@ class TProxyService : VpnService() {
     }
 
     companion object {
-        const val ACTION_CONNECT: String = "com.simplexray.an.CONNECT"
+        const val ACTION_CONNECT_VPN: String = "com.simplexray.an.CONNECT"
         const val ACTION_DISCONNECT: String = "com.simplexray.an.DISCONNECT"
         const val ACTION_START: String = "com.simplexray.an.START"
         const val ACTION_STOP: String = "com.simplexray.an.STOP"
         const val ACTION_LOG_UPDATE: String = "com.simplexray.an.LOG_UPDATE"
         const val ACTION_RELOAD_CONFIG: String = "com.simplexray.an.RELOAD_CONFIG"
         const val EXTRA_LOG_DATA: String = "log_data"
-        private const val TAG = "VpnService"
+        private const val TAG = "TProxyService"
         private const val BROADCAST_DELAY_MS: Long = 3000
         private const val IPV4_REGEX =
             "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
@@ -454,8 +454,8 @@ class TProxyService : VpnService() {
             }
         }
 
-        fun validateTunRoutes(routes: String): Boolean {
-            return parseTunRoutes(routes) != null
+        fun validateExcludedRoutes(routes: String): Boolean {
+            return parseExcludedIpv4Routes(routes) != null
         }
 
         fun normalizeTunDnsIpv4(servers: String): String? {
@@ -496,7 +496,7 @@ class TProxyService : VpnService() {
             return parts[0] to prefix
         }
 
-        private fun parseTunRoutes(routes: String): List<Pair<String, Int>>? {
+        private fun parseExcludedIpv4Routes(routes: String): List<Pair<String, Int>>? {
             val parsedRoutes = mutableListOf<Pair<String, Int>>()
             for (line in routes.lineSequence()) {
                 val route = line.trim()

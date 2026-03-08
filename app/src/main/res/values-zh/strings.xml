@@ -80,8 +80,8 @@
     <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
     <string name="auto">自动</string>
-    <string name="tun_routes_title">路由规则（绕过）</string>
-    <string name="invalid_tun_routes">路由格式无效，请按每行一个 IPv4 CIDR 填写。</string>
+    <string name="excluded_routes_title">路由规则（绕过）</string>
+    <string name="invalid_excluded_routes">路由格式无效，请按每行一个 IPv4 CIDR 填写。</string>
     <string name="tun_name_title">接口名称</string>
     <string name="tun_ipv4_cidr_title">IPv4 地址</string>
     <string name="tun_ipv6_cidr_title">IPv6 地址</string>

@@ -80,7 +80,7 @@ class MainViewModel(application: Application) :
             tunMtu = InputFieldState(prefs.tunMtu.toString()),
             tunIpv4Cidr = InputFieldState(prefs.tunIpv4Cidr),
             tunIpv6Cidr = InputFieldState(prefs.tunIpv6Cidr),
-            tunRoutes = InputFieldState(prefs.tunRoutes),
+            excludedRoutes = InputFieldState(prefs.excludedRoutes),
             hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
@@ -160,7 +160,7 @@ class MainViewModel(application: Application) :
             tunMtu = InputFieldState(prefs.tunMtu.toString()),
             tunIpv4Cidr = InputFieldState(prefs.tunIpv4Cidr),
             tunIpv6Cidr = InputFieldState(prefs.tunIpv6Cidr),
-            tunRoutes = InputFieldState(prefs.tunRoutes),
+            excludedRoutes = InputFieldState(prefs.excludedRoutes),
             hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
@@ -208,7 +208,7 @@ class MainViewModel(application: Application) :
 
     fun setServiceEnabled(enabled: Boolean) {
         _isServiceEnabled.value = enabled
-        prefs.enable = enabled
+        prefs.serviceEnabled = enabled
     }
 
     suspend fun createConfigFile(): String? {
@@ -406,31 +406,31 @@ class MainViewModel(application: Application) :
         )
     }
 
-    fun updateTunRoutes(routes: String): Boolean {
+    fun updateExcludedRoutes(routes: String): Boolean {
         if (routes.isBlank()) {
             val defaultRoutes =
                 application.resources.getStringArray(R.array.default_tun_routes).joinToString("\n")
-            prefs.tunRoutes = defaultRoutes
+            prefs.excludedRoutes = defaultRoutes
             _settingsState.value = _settingsState.value.copy(
-                tunRoutes = InputFieldState(defaultRoutes)
+                excludedRoutes = InputFieldState(defaultRoutes)
             )
             return true
         }
 
-        if (!TProxyService.validateTunRoutes(routes)) {
+        if (!TProxyService.validateExcludedRoutes(routes)) {
             _settingsState.value = _settingsState.value.copy(
-                tunRoutes = InputFieldState(
+                excludedRoutes = InputFieldState(
                     value = routes,
-                    error = application.getString(R.string.invalid_tun_routes),
+                    error = application.getString(R.string.invalid_excluded_routes),
                     isValid = false
                 )
             )
             return false
         }
 
-        prefs.tunRoutes = routes
+        prefs.excludedRoutes = routes
         _settingsState.value = _settingsState.value.copy(
-            tunRoutes = InputFieldState(routes)
+            excludedRoutes = InputFieldState(routes)
         )
         return true
     }
@@ -563,7 +563,7 @@ class MainViewModel(application: Application) :
             if (vpnIntent != null) {
                 vpnPrepareLauncher.launch(vpnIntent)
             } else {
-                startTProxyService(TProxyService.ACTION_CONNECT)
+                startTProxyService(TProxyService.ACTION_CONNECT_VPN)
             }
         }
     }

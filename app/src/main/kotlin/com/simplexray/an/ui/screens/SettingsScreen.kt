@@ -87,14 +87,14 @@ fun SettingsScreen(
     } else {
         ListItemDefaults.colors()
     }
-    val tunRoutesList = settingsState.tunRoutes.value.lineSequence()
+    val excludedRoutesList = settingsState.excludedRoutes.value.lineSequence()
         .map { it.trim() }
         .filter { it.isNotEmpty() }
         .toList()
-    val tunRoutesPreview = pluralStringResource(
-        R.plurals.tun_routes_preview,
-        tunRoutesList.size,
-        tunRoutesList.size
+    val excludedRoutesPreview = pluralStringResource(
+        R.plurals.excluded_routes_preview,
+        excludedRoutesList.size,
+        excludedRoutesList.size
     )
     val hevSocks5TunnelConfigPreview = stringResource(R.string.hev_socks5_tunnel_config_preview_hint)
 
@@ -398,13 +398,13 @@ fun SettingsScreen(
         )
 
         EditableListItemWithBottomSheet(
-            headline = stringResource(R.string.tun_routes_title),
-            currentValue = settingsState.tunRoutes.value,
-            supportingValue = tunRoutesPreview,
-            onValueConfirmed = { newValue -> mainViewModel.updateTunRoutes(newValue) },
-            label = stringResource(R.string.tun_routes_title),
-            isError = !settingsState.tunRoutes.isValid,
-            errorMessage = settingsState.tunRoutes.error,
+            headline = stringResource(R.string.excluded_routes_title),
+            currentValue = settingsState.excludedRoutes.value,
+            supportingValue = excludedRoutesPreview,
+            onValueConfirmed = { newValue -> mainViewModel.updateExcludedRoutes(newValue) },
+            label = stringResource(R.string.excluded_routes_title),
+            isError = !settingsState.excludedRoutes.isValid,
+            errorMessage = settingsState.excludedRoutes.error,
             enabled = !vpnDisabled,
             minLines = 8,
             maxLines = 24,

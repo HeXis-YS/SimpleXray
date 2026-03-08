@@ -12,10 +12,10 @@ import com.simplexray.an.common.ThemeMode
 class Preferences(context: Context) {
     private val contentResolver: ContentResolver
     private val gson: Gson
-    private val context1: Context = context.applicationContext
+    private val appContext: Context = context.applicationContext
 
     init {
-        this.contentResolver = context1.contentResolver
+        this.contentResolver = appContext.contentResolver
         this.gson = Gson()
     }
 
@@ -158,7 +158,7 @@ class Preferences(context: Context) {
             setValueInProvider(IPV6, enable)
         }
 
-    var apps: Set<String?>?
+    var selectedApps: Set<String?>?
         get() {
             val jsonSet = getPrefData(APPS).first
             return jsonSet?.let {
@@ -171,15 +171,15 @@ class Preferences(context: Context) {
                 }
             }
         }
-        set(apps) {
-            val jsonSet = gson.toJson(apps)
+        set(selectedApps) {
+            val jsonSet = gson.toJson(selectedApps)
             setValueInProvider(APPS, jsonSet)
         }
 
-    var enable: Boolean
+    var serviceEnabled: Boolean
         get() = getBooleanPref(ENABLE, false)
-        set(enable) {
-            setValueInProvider(ENABLE, enable)
+        set(enabled) {
+            setValueInProvider(ENABLE, enabled)
         }
 
     var enableVpn: Boolean
@@ -188,10 +188,10 @@ class Preferences(context: Context) {
             setValueInProvider(ENABLE_VPN, value)
         }
 
-    var tunRoutes: String
+    var excludedRoutes: String
         get() = getNonBlankStringPref(
             TUN_ROUTES,
-            context1.resources.getStringArray(R.array.default_tun_routes).joinToString("\n")
+            appContext.resources.getStringArray(R.array.default_tun_routes).joinToString("\n")
         )
         set(value) {
             setValueInProvider(TUN_ROUTES, value)
@@ -230,7 +230,7 @@ class Preferences(context: Context) {
     var connectivityTestTarget: String
         get() = getNonBlankStringPref(
             CONNECTIVITY_TEST_TARGET,
-            context1.getString(R.string.connectivity_test_url)
+            appContext.getString(R.string.connectivity_test_url)
         )
         set(value) {
             setValueInProvider(CONNECTIVITY_TEST_TARGET, value)
@@ -259,13 +259,13 @@ class Preferences(context: Context) {
         }
 
     var geoipUrl: String
-        get() = getNonBlankStringPref(GEOIP_URL, context1.getString(R.string.geoip_url))
+        get() = getNonBlankStringPref(GEOIP_URL, appContext.getString(R.string.geoip_url))
         set(value) {
             setValueInProvider(GEOIP_URL, value)
         }
 
     var geositeUrl: String
-        get() = getNonBlankStringPref(GEOSITE_URL, context1.getString(R.string.geosite_url))
+        get() = getNonBlankStringPref(GEOSITE_URL, appContext.getString(R.string.geosite_url))
         set(value) {
             setValueInProvider(GEOSITE_URL, value)
         }

@@ -30,7 +30,7 @@ data class SettingsState(
     val tunMtu: InputFieldState,
     val tunIpv4Cidr: InputFieldState,
     val tunIpv6Cidr: InputFieldState,
-    val tunRoutes: InputFieldState,
+    val excludedRoutes: InputFieldState,
     val hevSocks5TunnelConfig: InputFieldState,
     val switches: SwitchStates,
     val info: InfoStates,
