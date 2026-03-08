@@ -73,6 +73,7 @@ fun SettingsScreen(
     val geositeProgress by mainViewModel.geositeDownloadProgress.collectAsStateWithLifecycle()
 
     val vpnDisabled = settingsState.switches.disableVpn
+    val ipv6ConfigEnabled = !vpnDisabled && settingsState.switches.ipv6Enabled
     val disabledHeadlineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     val disabledSupportingColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
     val vpnControlledListItemColors = if (vpnDisabled) {
@@ -397,7 +398,7 @@ fun SettingsScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             isError = !settingsState.tunIpv6Cidr.isValid,
             errorMessage = settingsState.tunIpv6Cidr.error,
-            enabled = !vpnDisabled,
+            enabled = ipv6ConfigEnabled,
             sheetState = sheetState,
             scope = scope
         )
@@ -411,15 +412,16 @@ fun SettingsScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             isError = !settingsState.tunDnsIpv6.isValid,
             errorMessage = settingsState.tunDnsIpv6.error,
-            enabled = !vpnDisabled,
+            enabled = ipv6ConfigEnabled,
             sheetState = sheetState,
             scope = scope
         )
 
         ListItem(
-            modifier = Modifier.clickable {
+            modifier = Modifier.clickable(enabled = !vpnDisabled) {
                 mainViewModel.navigateToAppList()
             },
+            colors = vpnControlledListItemColors,
             headlineContent = { Text(stringResource(R.string.apps_title)) },
             supportingContent = { Text(stringResource(R.string.apps_summary)) },
             trailingContent = {
@@ -453,6 +455,7 @@ fun SettingsScreen(
             label = stringResource(R.string.hev_socks5_tunnel_config_title),
             isError = !settingsState.hevSocks5TunnelConfig.isValid,
             errorMessage = settingsState.hevSocks5TunnelConfig.error,
+            enabled = !vpnDisabled,
             minLines = 8,
             maxLines = 16,
             sheetState = sheetState,
