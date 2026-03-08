@@ -1,3 +1,3 @@
--keep class com.simplexray.an.service.TProxyService {
+-keep class org.hexis.simplexray.service.TProxyService {
     @kotlin.jvm.JvmStatic *;
 }
