@@ -29,9 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.simplexray.an.R
+import com.simplexray.an.ui.components.LazyColumnScrollbar
 import com.simplexray.an.ui.theme.ScrollbarDefaults
 import com.simplexray.an.viewmodel.LogViewModel
-import my.nanihadesuka.compose.LazyColumnScrollbar
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable

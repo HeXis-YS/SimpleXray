@@ -67,12 +67,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.simplexray.an.R
+import com.simplexray.an.ui.components.LazyColumnScrollbar
 import com.simplexray.an.ui.theme.ScrollbarDefaults
 import com.simplexray.an.viewmodel.AppListViewModel
 import com.simplexray.an.viewmodel.AppListViewUiEvent
 import com.simplexray.an.viewmodel.Package
 import kotlinx.coroutines.flow.collectLatest
-import my.nanihadesuka.compose.LazyColumnScrollbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
