@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.net.IpPrefix
 import android.net.VpnService
 import android.os.Build
 import android.os.Handler
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.io.InterruptedIOException
+import java.net.InetAddress
 import java.util.regex.Pattern
 import kotlin.concurrent.Volatile
 import kotlin.system.exitProcess
@@ -302,8 +304,15 @@ class TProxyService : VpnService() {
         val routeSpec = parseTunRoutes(prefs.tunRoutes)
             ?: parseTunRoutes(resources.getStringArray(R.array.default_tun_routes).joinToString("\n"))
             ?: emptyList()
-        for ((address, prefix) in routeSpec) {
-            addRoute(address, prefix)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            addRoute("0.0.0.0", 0)
+            for ((address, prefix) in routeSpec) {
+                excludeRoute(IpPrefix(InetAddress.getByName(address), prefix))
+            }
+        } else {
+            for ((address, prefix) in computeComplementIpv4Routes(routeSpec)) {
+                addRoute(address, prefix)
+            }
         }
 
         val dnsIpv4Servers = parseTunDnsServers(prefs.tunDnsIpv4, IPV4_PATTERN)
@@ -406,6 +415,7 @@ class TProxyService : VpnService() {
         private val HEV_MISC_SECTION_REGEX = Regex("(?m)^\\s*misc\\s*:\\s*$")
         private val IPV4_PATTERN: Pattern = Pattern.compile(IPV4_REGEX)
         private val IPV6_PATTERN: Pattern = Pattern.compile(IPV6_REGEX)
+        private const val MAX_IPV4: Long = 0xFFFF_FFFFL
 
         init {
             System.loadLibrary("hev-socks5-tunnel")
@@ -514,6 +524,88 @@ class TProxyService : VpnService() {
             } else {
                 null
             }
+        }
+
+        private fun computeComplementIpv4Routes(routes: List<Pair<String, Int>>): List<Pair<String, Int>> {
+            if (routes.isEmpty()) {
+                return listOf("0.0.0.0" to 0)
+            }
+
+            val ranges = routes
+                .map { (address, prefix) -> cidrToRange(address, prefix) }
+                .sortedBy { it.first }
+
+            val mergedRanges = mutableListOf<Pair<Long, Long>>()
+            for ((start, end) in ranges) {
+                if (mergedRanges.isEmpty() || start > mergedRanges.last().second + 1) {
+                    mergedRanges.add(start to end)
+                } else {
+                    val last = mergedRanges.last()
+                    if (end > last.second) {
+                        mergedRanges[mergedRanges.lastIndex] = last.first to end
+                    }
+                }
+            }
+
+            val complementCidrs = mutableListOf<Pair<String, Int>>()
+            var cursor = 0L
+            for ((start, end) in mergedRanges) {
+                if (start > cursor) {
+                    complementCidrs += rangeToCidrs(cursor, start - 1)
+                }
+                cursor = maxOf(cursor, end + 1)
+                if (cursor > MAX_IPV4) {
+                    break
+                }
+            }
+            if (cursor <= MAX_IPV4) {
+                complementCidrs += rangeToCidrs(cursor, MAX_IPV4)
+            }
+            return complementCidrs
+        }
+
+        private fun cidrToRange(address: String, prefix: Int): Pair<Long, Long> {
+            val ip = ipv4ToLong(address)
+            val hostBits = 32 - prefix
+            val blockSize = 1L shl hostBits
+            val start = (ip / blockSize) * blockSize
+            return start to (start + blockSize - 1)
+        }
+
+        private fun ipv4ToLong(address: String): Long {
+            val octets = address.split('.')
+            require(octets.size == 4)
+            return octets.fold(0L) { acc, part ->
+                (acc shl 8) or (part.toInt() and 0xFF).toLong()
+            }
+        }
+
+        private fun longToIpv4(value: Long): String {
+            return listOf(
+                (value shr 24) and 0xFF,
+                (value shr 16) and 0xFF,
+                (value shr 8) and 0xFF,
+                value and 0xFF
+            ).joinToString(".")
+        }
+
+        private fun rangeToCidrs(start: Long, end: Long): List<Pair<String, Int>> {
+            val cidrs = mutableListOf<Pair<String, Int>>()
+            var current = start
+            while (current <= end) {
+                val lowBit = current and -current
+                val maxAlignedPrefix = if (current == 0L) 0 else 32 - floorLog2(lowBit)
+                val remaining = end - current + 1
+                val maxRangePrefix = 32 - floorLog2(remaining)
+                val prefix = maxOf(maxAlignedPrefix, maxRangePrefix)
+                cidrs.add(longToIpv4(current) to prefix)
+                current += 1L shl (32 - prefix)
+            }
+            return cidrs
+        }
+
+        private fun floorLog2(value: Long): Int {
+            return 63 - java.lang.Long.numberOfLeadingZeros(value)
         }
 
     }
