@@ -10,7 +10,7 @@ data class InputFieldState(
 
 data class SwitchStates(
     val ipv6Enabled: Boolean,
-    val disableVpn: Boolean,
+    val vpnInterfaceEnabled: Boolean,
     val themeMode: ThemeMode
 )
 

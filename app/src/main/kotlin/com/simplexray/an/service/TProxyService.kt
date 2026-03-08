@@ -79,7 +79,7 @@ class TProxyService : VpnService() {
 
             ACTION_RELOAD_CONFIG -> {
                 val prefs = Preferences(this)
-                if (prefs.disableVpn) {
+                if (!prefs.enableVpn) {
                     Log.d(TAG, "Received RELOAD_CONFIG action (core-only mode)")
                     reloadingRequested = true
                     xrayProcess?.destroy()
@@ -101,7 +101,7 @@ class TProxyService : VpnService() {
                 xrayLogFileManager.clearLogs()
                 hevLogFileManager.clearLogs()
                 val prefs = Preferences(this)
-                if (prefs.disableVpn) {
+                if (!prefs.enableVpn) {
                     serviceScope.launch { runXrayProcess() }
                     val successIntent = Intent(ACTION_START)
                     successIntent.setPackage(application.packageName)

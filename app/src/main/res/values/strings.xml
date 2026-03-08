@@ -52,8 +52,8 @@
     <string name="no_app_for_export">No app available for export</string>
     <string name="export_failed">Export failed</string>
     <string name="save_fail">Failed to save</string>
-    <string name="disable_vpn_title">Disable VPN Interface</string>
-    <string name="disable_vpn_summary">When enabled, only the core will launch, and the VPN interface will be disabled.</string>
+    <string name="enable_vpn_title">Enable VPN Interface</string>
+    <string name="enable_vpn_summary">When disabled, only the core will launch, and the VPN interface will not start.</string>
     <string name="connectivity_test">Connectivity Test</string>
     <string name="connectivity_test_socks_server">SOCKS Server Address</string>
     <string name="connectivity_test_target">Target Address</string>

@@ -182,10 +182,10 @@ class Preferences(context: Context) {
             setValueInProvider(ENABLE, enable)
         }
 
-    var disableVpn: Boolean
-        get() = getBooleanPref(DISABLE_VPN, false)
+    var enableVpn: Boolean
+        get() = getBooleanPref(ENABLE_VPN, true)
         set(value) {
-            setValueInProvider(DISABLE_VPN, value)
+            setValueInProvider(ENABLE_VPN, value)
         }
 
     var tunRoutes: String
@@ -304,7 +304,7 @@ class Preferences(context: Context) {
         const val ENABLE: String = "Enable"
         const val SELECTED_CONFIG_PATH: String = "SelectedConfigPath"
         const val CONFIG_FILES_ORDER: String = "ConfigFilesOrder"
-        const val DISABLE_VPN: String = "DisableVpn"
+        const val ENABLE_VPN: String = "EnableVpn"
         const val TUN_ROUTES: String = "TunRoutes"
         const val HEV_SOCKS5_TUNNEL_CONFIG: String = "HevSocks5TunnelConfig"
         const val CONNECTIVITY_TEST_TARGET: String = "ConnectivityTestTarget"

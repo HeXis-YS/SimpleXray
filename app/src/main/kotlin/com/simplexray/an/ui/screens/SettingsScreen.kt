@@ -72,7 +72,8 @@ fun SettingsScreen(
     val geoipProgress by mainViewModel.geoipDownloadProgress.collectAsStateWithLifecycle()
     val geositeProgress by mainViewModel.geositeDownloadProgress.collectAsStateWithLifecycle()
 
-    val vpnDisabled = settingsState.switches.disableVpn
+    val vpnInterfaceEnabled = settingsState.switches.vpnInterfaceEnabled
+    val vpnDisabled = !vpnInterfaceEnabled
     val ipv6ConfigEnabled = !vpnDisabled && settingsState.switches.ipv6Enabled
     val disabledHeadlineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     val disabledSupportingColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
@@ -311,13 +312,13 @@ fun SettingsScreen(
         PreferenceCategoryTitle(stringResource(R.string.vpn_interface))
 
         ListItem(
-            headlineContent = { Text(stringResource(R.string.disable_vpn_title)) },
-            supportingContent = { Text(stringResource(R.string.disable_vpn_summary)) },
+            headlineContent = { Text(stringResource(R.string.enable_vpn_title)) },
+            supportingContent = { Text(stringResource(R.string.enable_vpn_summary)) },
             trailingContent = {
                 Switch(
-                    checked = settingsState.switches.disableVpn,
+                    checked = vpnInterfaceEnabled,
                     onCheckedChange = {
-                        mainViewModel.setDisableVpnEnabled(it)
+                        mainViewModel.setVpnInterfaceEnabled(it)
                     }
                 )
             }

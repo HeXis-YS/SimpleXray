@@ -87,10 +87,10 @@ fun rememberMainScreenCallbacks(
             mainViewModel.stopTProxyService()
         } else {
             mainViewModel.setControlMenuClickable(false)
-            if (mainViewModel.settingsState.value.switches.disableVpn) {
-                mainViewModel.startTProxyService(TProxyService.ACTION_START)
-            } else {
+            if (mainViewModel.settingsState.value.switches.vpnInterfaceEnabled) {
                 mainViewModel.prepareAndStartVpn(launchers.vpnPrepareLauncher)
+            } else {
+                mainViewModel.startTProxyService(TProxyService.ACTION_START)
             }
         }
     }

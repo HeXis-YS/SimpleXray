@@ -47,8 +47,8 @@
     <string name="no_app_for_export">没有可用于导出的应用</string>
     <string name="export_failed">导出失败</string>
     <string name="save_fail">保存失败</string>
-    <string name="disable_vpn_title">禁用VPN接口</string>
-    <string name="disable_vpn_summary">启用时，仅启动核心而不启用VPN</string>
+    <string name="enable_vpn_title">启用VPN接口</string>
+    <string name="enable_vpn_summary">关闭时，仅启动核心而不启用VPN接口</string>
     <string name="connectivity_test">连通性测试</string>
     <string name="connectivity_test_socks_server">SOCKS 服务器地址</string>
     <string name="connectivity_test_target">目标地址</string>

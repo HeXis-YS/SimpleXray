@@ -84,7 +84,7 @@ class MainViewModel(application: Application) :
             hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
-                disableVpn = prefs.disableVpn,
+                vpnInterfaceEnabled = prefs.enableVpn,
                 themeMode = prefs.theme
             ),
             info = InfoStates(
@@ -164,7 +164,7 @@ class MainViewModel(application: Application) :
             hevSocks5TunnelConfig = InputFieldState(prefs.hevSocks5TunnelConfig),
             switches = SwitchStates(
                 ipv6Enabled = prefs.ipv6,
-                disableVpn = prefs.disableVpn,
+                vpnInterfaceEnabled = prefs.enableVpn,
                 themeMode = prefs.theme
             ),
             info = _settingsState.value.info.copy(
@@ -435,10 +435,10 @@ class MainViewModel(application: Application) :
         return true
     }
 
-    fun setDisableVpnEnabled(enabled: Boolean) {
-        prefs.disableVpn = enabled
+    fun setVpnInterfaceEnabled(enabled: Boolean) {
+        prefs.enableVpn = enabled
         _settingsState.value = _settingsState.value.copy(
-            switches = _settingsState.value.switches.copy(disableVpn = enabled)
+            switches = _settingsState.value.switches.copy(vpnInterfaceEnabled = enabled)
         )
     }
 
