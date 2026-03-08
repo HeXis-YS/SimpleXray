@@ -5,7 +5,7 @@
     <string name="geoip_url" translatable="false">https://ghfast.top/https://github.com/HeXis-YS/xray-geodata-cut/releases/download/rolling/geoip-client.dat</string>
     <string name="geosite_url" translatable="false">https://ghfast.top/https://github.com/HeXis-YS/xray-geodata-cut/releases/download/rolling/geosite-client.dat</string>
     <string name="connectivity_test_url" translatable="false">http://www.gstatic.com/generate_204</string>
-    <string name="ipv6">IPv6</string>
+    <string name="ipv6" translatable="false">IPv6</string>
     <string name="apps_title">App-based Proxy</string>
     <string name="apps_summary">Select apps to be proxied, otherwise use global mode.</string>
     <string name="save">Save</string>
@@ -60,8 +60,8 @@
     <string name="connectivity_test_timeout">Test Timeout (ms)</string>
     <string name="connectivity_test_latency">Network Latency: %1$d ms</string>
     <string name="connectivity_test_failed">Failed to connect to the target server</string>
-    <string name="connectivity_test_invalid_url">Invalid target address format</string>
-    <string name="connectivity_test_invalid_socks_server">Invalid SOCKS server format. Use host:port (example: [::1]:10809)</string>
+    <string name="connectivity_test_invalid_url">Invalid target address</string>
+    <string name="connectivity_test_invalid_socks_server">Invalid SOCKS server. Use host:port (example: [::1]:10809)</string>
     <string name="select_all">Select All</string>
     <string name="inverse_selection">Inverse Selection</string>
     <string name="show_system_apps">Show System Apps</string>
@@ -75,9 +75,9 @@
     <string name="update">Update</string>
     <string name="download_success">Download successful</string>
     <string name="download_failed">Download failed</string>
-    <string name="connecting">Connecting…</string>
-    <string name="downloading">Downloading… %1$d%%</string>
-    <string name="downloading_no_size">Downloading…</string>
+    <string name="connecting">Connecting...</string>
+    <string name="downloading">Downloading... %1$d%%</string>
+    <string name="downloading_no_size">Downloading...</string>
     <string name="download_cancelled">Download cancelled</string>
     <string name="general">General</string>
     <string name="restore_default_url">Restore default URL</string>
@@ -86,18 +86,18 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="auto">Auto</string>
-    <string name="tun_routes_title">Tun Routes</string>
+    <string name="tun_routes_title">Excluded routes</string>
     <string name="invalid_tun_routes">Invalid routes format. Use one IPv4 CIDR per line.</string>
-    <string name="tun_dns_ipv4_title">IPv4 DNS</string>
-    <string name="tun_dns_ipv6_title">IPv6 DNS</string>
+    <string name="tun_dns_ipv4_title" translatable="false">IPv4 DNS</string>
+    <string name="tun_dns_ipv6_title" translatable="false">IPv6 DNS</string>
     <string name="tun_name_title">Tun Name</string>
-    <string name="tun_mtu_title">MTU</string>
+    <string name="tun_mtu_title" translatable="false">MTU</string>
     <string name="tun_ipv4_cidr_title">IPv4 Address</string>
     <string name="tun_ipv6_cidr_title">IPv6 Address</string>
     <string name="invalid_tun_dns">Invalid DNS. Use DNS addresses separated by commas.</string>
     <string name="invalid_tun_mtu_range">MTU must be between 68 and 65535</string>
-    <string name="invalid_tun_ipv4_cidr">Invalid IPv4 address format (example: 192.0.0.8/32)</string>
-    <string name="invalid_tun_ipv6_cidr">Invalid IPv6 address format (example: fc00::1/128)</string>
+    <string name="invalid_tun_ipv4_cidr">Invalid IPv4 address (example: 192.0.0.8/32)</string>
+    <string name="invalid_tun_ipv6_cidr">Invalid IPv6 address (example: fc00::1/128)</string>
     <string name="hev_socks5_tunnel_config_title">hev-socks5-tunnel config</string>
     <string name="hev_socks5_tunnel_config_preview_hint">Tap to edit custom YAML</string>
 </resources>

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="ipv6">IPv6</string>
     <string name="apps_title">分应用代理</string>
-    <string name="apps_summary">选择需要代理的应用,否则使用全局模式</string>
+    <string name="apps_summary">选择需要代理的应用，否则使用全局模式</string>
     <string name="save">保存</string>
     <string name="search">搜索</string>
     <string name="log">日志</string>
@@ -10,7 +9,7 @@
     <string name="config">编辑配置</string>
     <string name="settings">设置</string>
     <string name="about">关于</string>
-    <string name="ipv6_enabled">为VPN接口启用IPv6</string>
+    <string name="ipv6_enabled">为 VPN 接口启用 IPv6</string>
     <string name="new_profile">新建</string>
     <string name="configuration">配置</string>
     <string name="vpn_interface">VPN接口</string>
@@ -27,7 +26,7 @@
     <string name="filename">文件名</string>
     <string name="export">导出</string>
     <string name="import_from_clipboard">从剪贴板导入</string>
-    <string name="import_failed">导入失败: 粘贴板上未找到配置</string>
+    <string name="import_failed">导入失败：剪贴板上未找到配置</string>
     <string name="version">版本</string>
     <string name="kernel">内核</string>
     <string name="no_config_files">无配置文件</string>
@@ -48,7 +47,7 @@
     <string name="export_failed">导出失败</string>
     <string name="save_fail">保存失败</string>
     <string name="enable_vpn_title">启用VPN接口</string>
-    <string name="enable_vpn_summary">关闭时，仅启动核心而不启用VPN接口</string>
+    <string name="enable_vpn_summary">禁用时，仅启动核心而不启用 VPN 接口</string>
     <string name="connectivity_test">连通性测试</string>
     <string name="connectivity_test_socks_server">SOCKS 服务器地址</string>
     <string name="connectivity_test_target">目标地址</string>
@@ -81,12 +80,9 @@
     <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
     <string name="auto">自动</string>
-    <string name="tun_routes_title">Tun 路由</string>
+    <string name="tun_routes_title">路由规则（绕过）</string>
     <string name="invalid_tun_routes">路由格式无效，请按每行一个 IPv4 CIDR 填写。</string>
-    <string name="tun_dns_ipv4_title">IPv4 DNS</string>
-    <string name="tun_dns_ipv6_title">IPv6 DNS</string>
     <string name="tun_name_title">接口名称</string>
-    <string name="tun_mtu_title">MTU</string>
     <string name="tun_ipv4_cidr_title">IPv4 地址</string>
     <string name="tun_ipv6_cidr_title">IPv6 地址</string>
     <string name="invalid_tun_dns">DNS 无效，请使用逗号分隔 DNS 地址。</string>
