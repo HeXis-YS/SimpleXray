@@ -279,7 +279,7 @@ class MainViewModel(application: Application) :
         value = value,
         defaultValue = Preferences.DEFAULT_TUN_DNS_IPV4,
         normalize = TProxyService::normalizeTunDnsIpv4,
-        invalidMessage = application.getString(R.string.invalid_tun_dns_ipv4),
+        invalidMessage = application.getString(R.string.invalid_tun_dns),
         onValid = { prefs.tunDnsIpv4 = it },
         stateUpdater = { state -> copy(tunDnsIpv4 = state) }
     )
@@ -288,7 +288,7 @@ class MainViewModel(application: Application) :
         value = value,
         defaultValue = Preferences.DEFAULT_TUN_DNS_IPV6,
         normalize = TProxyService::normalizeTunDnsIpv6,
-        invalidMessage = application.getString(R.string.invalid_tun_dns_ipv6),
+        invalidMessage = application.getString(R.string.invalid_tun_dns),
         onValid = { prefs.tunDnsIpv6 = it },
         stateUpdater = { state -> copy(tunDnsIpv6 = state) }
     )

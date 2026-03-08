@@ -298,20 +298,6 @@ fun SettingsScreen(
         PreferenceCategoryTitle(stringResource(R.string.vpn_interface))
 
         ListItem(
-            modifier = Modifier.clickable {
-                mainViewModel.navigateToAppList()
-            },
-            headlineContent = { Text(stringResource(R.string.apps_title)) },
-            supportingContent = { Text(stringResource(R.string.apps_summary)) },
-            trailingContent = {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null
-                )
-            }
-        )
-
-        ListItem(
             headlineContent = { Text(stringResource(R.string.disable_vpn_title)) },
             supportingContent = { Text(stringResource(R.string.disable_vpn_summary)) },
             trailingContent = {
@@ -322,20 +308,6 @@ fun SettingsScreen(
                     }
                 )
             }
-        )
-
-        EditableListItemWithBottomSheet(
-            headline = stringResource(R.string.hev_socks5_tunnel_config_title),
-            currentValue = settingsState.hevSocks5TunnelConfig.value,
-            supportingValue = hevSocks5TunnelConfigPreview,
-            onValueConfirmed = { newValue -> mainViewModel.updateHevSocks5TunnelConfig(newValue) },
-            label = stringResource(R.string.hev_socks5_tunnel_config_title),
-            isError = !settingsState.hevSocks5TunnelConfig.isValid,
-            errorMessage = settingsState.hevSocks5TunnelConfig.error,
-            minLines = 8,
-            maxLines = 16,
-            sheetState = sheetState,
-            scope = scope
         )
 
         EditableListItemWithBottomSheet(
@@ -377,19 +349,6 @@ fun SettingsScreen(
         )
 
         EditableListItemWithBottomSheet(
-            headline = stringResource(R.string.tun_ipv6_cidr_title),
-            currentValue = settingsState.tunIpv6Cidr.value,
-            onValueConfirmed = { newValue -> mainViewModel.updateTunIpv6Cidr(newValue) },
-            label = stringResource(R.string.tun_ipv6_cidr_title),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-            isError = !settingsState.tunIpv6Cidr.isValid,
-            errorMessage = settingsState.tunIpv6Cidr.error,
-            enabled = !vpnDisabled,
-            sheetState = sheetState,
-            scope = scope
-        )
-
-        EditableListItemWithBottomSheet(
             headline = stringResource(R.string.tun_dns_ipv4_title),
             currentValue = settingsState.tunDnsIpv4.value,
             supportingValue = tunDnsIpv4Preview,
@@ -398,20 +357,6 @@ fun SettingsScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             isError = !settingsState.tunDnsIpv4.isValid,
             errorMessage = settingsState.tunDnsIpv4.error,
-            enabled = !vpnDisabled,
-            sheetState = sheetState,
-            scope = scope
-        )
-
-        EditableListItemWithBottomSheet(
-            headline = stringResource(R.string.tun_dns_ipv6_title),
-            currentValue = settingsState.tunDnsIpv6.value,
-            supportingValue = tunDnsIpv6Preview,
-            onValueConfirmed = { newValue -> mainViewModel.updateTunDnsIpv6(newValue) },
-            label = stringResource(R.string.tun_dns_ipv6_title),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-            isError = !settingsState.tunDnsIpv6.isValid,
-            errorMessage = settingsState.tunDnsIpv6.error,
             enabled = !vpnDisabled,
             sheetState = sheetState,
             scope = scope
@@ -432,6 +377,47 @@ fun SettingsScreen(
         )
 
         EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.tun_ipv6_cidr_title),
+            currentValue = settingsState.tunIpv6Cidr.value,
+            onValueConfirmed = { newValue -> mainViewModel.updateTunIpv6Cidr(newValue) },
+            label = stringResource(R.string.tun_ipv6_cidr_title),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            isError = !settingsState.tunIpv6Cidr.isValid,
+            errorMessage = settingsState.tunIpv6Cidr.error,
+            enabled = !vpnDisabled,
+            sheetState = sheetState,
+            scope = scope
+        )
+
+        EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.tun_dns_ipv6_title),
+            currentValue = settingsState.tunDnsIpv6.value,
+            supportingValue = tunDnsIpv6Preview,
+            onValueConfirmed = { newValue -> mainViewModel.updateTunDnsIpv6(newValue) },
+            label = stringResource(R.string.tun_dns_ipv6_title),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            isError = !settingsState.tunDnsIpv6.isValid,
+            errorMessage = settingsState.tunDnsIpv6.error,
+            enabled = !vpnDisabled,
+            sheetState = sheetState,
+            scope = scope
+        )
+
+        ListItem(
+            modifier = Modifier.clickable {
+                mainViewModel.navigateToAppList()
+            },
+            headlineContent = { Text(stringResource(R.string.apps_title)) },
+            supportingContent = { Text(stringResource(R.string.apps_summary)) },
+            trailingContent = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null
+                )
+            }
+        )
+
+        EditableListItemWithBottomSheet(
             headline = stringResource(R.string.tun_routes_title),
             currentValue = settingsState.tunRoutes.value,
             supportingValue = tunRoutesPreview,
@@ -442,6 +428,20 @@ fun SettingsScreen(
             enabled = !vpnDisabled,
             minLines = 8,
             maxLines = 24,
+            sheetState = sheetState,
+            scope = scope
+        )
+
+        EditableListItemWithBottomSheet(
+            headline = stringResource(R.string.hev_socks5_tunnel_config_title),
+            currentValue = settingsState.hevSocks5TunnelConfig.value,
+            supportingValue = hevSocks5TunnelConfigPreview,
+            onValueConfirmed = { newValue -> mainViewModel.updateHevSocks5TunnelConfig(newValue) },
+            label = stringResource(R.string.hev_socks5_tunnel_config_title),
+            isError = !settingsState.hevSocks5TunnelConfig.isValid,
+            errorMessage = settingsState.hevSocks5TunnelConfig.error,
+            minLines = 8,
+            maxLines = 16,
             sheetState = sheetState,
             scope = scope
         )
