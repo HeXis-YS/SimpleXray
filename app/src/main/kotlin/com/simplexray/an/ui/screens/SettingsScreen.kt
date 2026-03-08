@@ -87,32 +87,6 @@ fun SettingsScreen(
     } else {
         ListItemDefaults.colors()
     }
-    val tunDnsIpv4List = settingsState.tunDnsIpv4.value
-        .split(',')
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-    val tunDnsIpv4Preview = if (tunDnsIpv4List.isEmpty()) {
-        stringResource(R.string.tun_dns_empty)
-    } else {
-        pluralStringResource(
-            R.plurals.tun_dns_preview,
-            tunDnsIpv4List.size,
-            tunDnsIpv4List.size
-        )
-    }
-    val tunDnsIpv6List = settingsState.tunDnsIpv6.value
-        .split(',')
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-    val tunDnsIpv6Preview = if (tunDnsIpv6List.isEmpty()) {
-        stringResource(R.string.tun_dns_empty)
-    } else {
-        pluralStringResource(
-            R.plurals.tun_dns_preview,
-            tunDnsIpv6List.size,
-            tunDnsIpv6List.size
-        )
-    }
     val tunRoutesList = settingsState.tunRoutes.value.lineSequence()
         .map { it.trim() }
         .filter { it.isNotEmpty() }
@@ -366,7 +340,6 @@ fun SettingsScreen(
         EditableListItemWithBottomSheet(
             headline = stringResource(R.string.tun_dns_ipv4_title),
             currentValue = settingsState.tunDnsIpv4.value,
-            supportingValue = tunDnsIpv4Preview,
             onValueConfirmed = { newValue -> mainViewModel.updateTunDnsIpv4(newValue) },
             label = stringResource(R.string.tun_dns_ipv4_title),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
@@ -408,7 +381,6 @@ fun SettingsScreen(
         EditableListItemWithBottomSheet(
             headline = stringResource(R.string.tun_dns_ipv6_title),
             currentValue = settingsState.tunDnsIpv6.value,
-            supportingValue = tunDnsIpv6Preview,
             onValueConfirmed = { newValue -> mainViewModel.updateTunDnsIpv6(newValue) },
             label = stringResource(R.string.tun_dns_ipv6_title),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),

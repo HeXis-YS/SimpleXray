@@ -86,7 +86,6 @@
     <string name="invalid_tun_routes">路由格式无效，请按每行一个 IPv4 CIDR 填写。</string>
     <string name="tun_dns_ipv4_title">IPv4 DNS</string>
     <string name="tun_dns_ipv6_title">IPv6 DNS</string>
-    <string name="tun_dns_empty">点击编辑 Tun DNS 服务器</string>
     <string name="tun_name_title">接口名称</string>
     <string name="tun_mtu_title">MTU</string>
     <string name="tun_ipv4_cidr_title">IPv4 地址</string>

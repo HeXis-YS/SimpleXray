@@ -4,8 +4,4 @@
         <item quantity="one">%1$d route</item>
         <item quantity="other">%1$d routes</item>
     </plurals>
-    <plurals name="tun_dns_preview">
-        <item quantity="one">%1$d server</item>
-        <item quantity="other">%1$d servers</item>
-    </plurals>
 </resources>
