@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.net.InetAddresses
 import android.net.IpPrefix
 import android.net.VpnService
 import android.os.Build
@@ -30,8 +31,9 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.io.InterruptedIOException
+import java.net.Inet4Address
 import java.net.InetAddress
-import java.util.regex.Pattern
+import java.net.Inet6Address
 import kotlin.concurrent.Volatile
 import kotlin.system.exitProcess
 
@@ -315,8 +317,8 @@ class TProxyService : VpnService() {
             }
         }
 
-        val dnsIpv4Servers = parseTunDnsServers(prefs.tunDnsIpv4, IPV4_PATTERN)
-            ?: parseTunDnsServers(Preferences.DEFAULT_TUN_DNS_IPV4, IPV4_PATTERN)
+        val dnsIpv4Servers = parseTunDnsServers(prefs.tunDnsIpv4, ::isValidIpv4Address)
+            ?: parseTunDnsServers(Preferences.DEFAULT_TUN_DNS_IPV4, ::isValidIpv4Address)
             ?: emptyList()
         for (server in dnsIpv4Servers) {
             addDnsServer(server)
@@ -329,8 +331,8 @@ class TProxyService : VpnService() {
             }
             addRoute("::", 0)
 
-            val dnsIpv6Servers = parseTunDnsServers(prefs.tunDnsIpv6, IPV6_PATTERN)
-                ?: parseTunDnsServers(Preferences.DEFAULT_TUN_DNS_IPV6, IPV6_PATTERN)
+            val dnsIpv6Servers = parseTunDnsServers(prefs.tunDnsIpv6, ::isValidIpv6Address)
+                ?: parseTunDnsServers(Preferences.DEFAULT_TUN_DNS_IPV6, ::isValidIpv6Address)
                 ?: emptyList()
             for (server in dnsIpv6Servers) {
                 addDnsServer(server)
@@ -407,14 +409,8 @@ class TProxyService : VpnService() {
         const val EXTRA_LOG_DATA: String = "log_data"
         private const val TAG = "TProxyService"
         private const val BROADCAST_DELAY_MS: Long = 3000
-        private const val IPV4_REGEX =
-            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-        private const val IPV6_REGEX =
-            "^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80::(fe80(:[0-9a-fA-F]{0,4})?){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))$"
         private val HEV_LOG_FILE_REGEX = Regex("(?m)^\\s*log-file\\s*:")
         private val HEV_MISC_SECTION_REGEX = Regex("(?m)^\\s*misc\\s*:\\s*$")
-        private val IPV4_PATTERN: Pattern = Pattern.compile(IPV4_REGEX)
-        private val IPV6_PATTERN: Pattern = Pattern.compile(IPV6_REGEX)
         private const val MAX_IPV4: Long = 0xFFFF_FFFFL
 
         init {
@@ -459,17 +455,17 @@ class TProxyService : VpnService() {
         }
 
         fun normalizeTunDnsIpv4(servers: String): String? {
-            return parseTunDnsServers(servers, IPV4_PATTERN)?.joinToString(",")
+            return parseTunDnsServers(servers, ::isValidIpv4Address)?.joinToString(",")
         }
 
         fun normalizeTunDnsIpv6(servers: String): String? {
-            return parseTunDnsServers(servers, IPV6_PATTERN)?.joinToString(",")
+            return parseTunDnsServers(servers, ::isValidIpv6Address)?.joinToString(",")
         }
 
         fun parseTunIpv4Cidr(value: String): Pair<String, Int>? {
             val cidr = value.trim()
             val parts = cidr.split("/", limit = 2)
-            if (parts.size != 2 || !IPV4_PATTERN.matcher(parts[0]).matches()) {
+            if (parts.size != 2 || !isValidIpv4Address(parts[0])) {
                 return null
             }
 
@@ -484,7 +480,7 @@ class TProxyService : VpnService() {
         fun parseTunIpv6Cidr(value: String): Pair<String, Int>? {
             val cidr = value.trim()
             val parts = cidr.split("/", limit = 2)
-            if (parts.size != 2 || !IPV6_PATTERN.matcher(parts[0]).matches()) {
+            if (parts.size != 2 || !isValidIpv6Address(parts[0])) {
                 return null
             }
 
@@ -510,7 +506,7 @@ class TProxyService : VpnService() {
             return parsedRoutes.takeIf { it.isNotEmpty() }
         }
 
-        private fun parseTunDnsServers(servers: String, pattern: Pattern): List<String>? {
+        private fun parseTunDnsServers(servers: String, validator: (String) -> Boolean): List<String>? {
             val parsedServers = servers
                 .split(',')
                 .map { it.trim() }
@@ -519,9 +515,25 @@ class TProxyService : VpnService() {
                 return null
             }
 
-            return if (parsedServers.all { pattern.matcher(it).matches() }) {
+            return if (parsedServers.all(validator)) {
                 parsedServers
             } else {
+                null
+            }
+        }
+
+        private fun isValidIpv4Address(value: String): Boolean {
+            return parseNumericAddress(value) is Inet4Address
+        }
+
+        private fun isValidIpv6Address(value: String): Boolean {
+            return parseNumericAddress(value) is Inet6Address
+        }
+
+        private fun parseNumericAddress(value: String): InetAddress? {
+            return try {
+                InetAddresses.parseNumericAddress(value)
+            } catch (_: IllegalArgumentException) {
                 null
             }
         }
