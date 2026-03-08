@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -639,6 +640,7 @@ fun EditableListItemWithBottomSheet(
                     value = tempValue,
                     onValueChange = { tempValue = it },
                     label = { Text(label) },
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
                     keyboardOptions = keyboardOptions,
                     isError = isError,
                     minLines = minLines,
@@ -688,7 +690,12 @@ fun EditableListItemWithBottomSheet(
 
     ListItem(
         headlineContent = { Text(headline) },
-        supportingContent = { Text(supportingValue) },
+        supportingContent = {
+            Text(
+                text = supportingValue,
+                fontFamily = FontFamily.Monospace
+            )
+        },
         colors = ListItemDefaults.colors(
             headlineColor = if (enabled) MaterialTheme.colorScheme.onSurface else disabledHeadlineColor,
             supportingColor = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else disabledSupportingColor,
