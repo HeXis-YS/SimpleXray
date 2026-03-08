@@ -28,6 +28,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -72,6 +73,17 @@ fun SettingsScreen(
     val geositeProgress by mainViewModel.geositeDownloadProgress.collectAsStateWithLifecycle()
 
     val vpnDisabled = settingsState.switches.disableVpn
+    val disabledHeadlineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    val disabledSupportingColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+    val vpnControlledListItemColors = if (vpnDisabled) {
+        ListItemDefaults.colors(
+            headlineColor = disabledHeadlineColor,
+            supportingColor = disabledSupportingColor,
+            trailingIconColor = disabledSupportingColor
+        )
+    } else {
+        ListItemDefaults.colors()
+    }
     val tunDnsIpv4List = settingsState.tunDnsIpv4.value
         .split(',')
         .map { it.trim() }
@@ -365,6 +377,7 @@ fun SettingsScreen(
         ListItem(
             headlineContent = { Text(stringResource(R.string.ipv6)) },
             supportingContent = { Text(stringResource(R.string.ipv6_enabled)) },
+            colors = vpnControlledListItemColors,
             trailingContent = {
                 Switch(
                     checked = settingsState.switches.ipv6Enabled,
@@ -600,6 +613,13 @@ fun EditableListItemWithBottomSheet(
 ) {
     var showSheet by remember { mutableStateOf(false) }
     var tempValue by remember { mutableStateOf(currentValue) }
+    val disabledHeadlineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    val disabledSupportingColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+    val trailingIconColor = when {
+        !enabled -> disabledSupportingColor
+        isError -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     if (showSheet) {
         ModalBottomSheet(
@@ -665,6 +685,11 @@ fun EditableListItemWithBottomSheet(
     ListItem(
         headlineContent = { Text(headline) },
         supportingContent = { Text(supportingValue) },
+        colors = ListItemDefaults.colors(
+            headlineColor = if (enabled) MaterialTheme.colorScheme.onSurface else disabledHeadlineColor,
+            supportingColor = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else disabledSupportingColor,
+            trailingIconColor = trailingIconColor
+        ),
         modifier = Modifier.clickable(enabled = enabled) {
             tempValue = currentValue
             showSheet = true
@@ -674,12 +699,13 @@ fun EditableListItemWithBottomSheet(
                 Icon(
                     painter = painterResource(id = R.drawable.cancel),
                     contentDescription = errorMessage,
-                    tint = MaterialTheme.colorScheme.error
+                    tint = trailingIconColor
                 )
             } else {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = trailingIconColor
                 )
             }
         }
