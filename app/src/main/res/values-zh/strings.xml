@@ -82,7 +82,6 @@
     <string name="theme_dark">深色</string>
     <string name="auto">自动</string>
     <string name="tun_routes_title">Tun 路由</string>
-    <string name="tun_routes_empty">点击编辑 Tun 路由</string>
     <string name="invalid_tun_routes">路由格式无效，请按每行一个 IPv4 CIDR 填写。</string>
     <string name="tun_dns_ipv4_title">IPv4 DNS</string>
     <string name="tun_dns_ipv6_title">IPv6 DNS</string>

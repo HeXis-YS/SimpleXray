@@ -87,7 +87,6 @@
     <string name="theme_dark">Dark</string>
     <string name="auto">Auto</string>
     <string name="tun_routes_title">Tun Routes</string>
-    <string name="tun_routes_empty">Tap to edit tunnel routes</string>
     <string name="invalid_tun_routes">Invalid routes format. Use one IPv4 CIDR per line.</string>
     <string name="tun_dns_ipv4_title">IPv4 DNS</string>
     <string name="tun_dns_ipv6_title">IPv6 DNS</string>

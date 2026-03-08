@@ -91,15 +91,11 @@ fun SettingsScreen(
         .map { it.trim() }
         .filter { it.isNotEmpty() }
         .toList()
-    val tunRoutesPreview = if (tunRoutesList.isEmpty()) {
-        stringResource(R.string.tun_routes_empty)
-    } else {
-        pluralStringResource(
-            R.plurals.tun_routes_preview,
-            tunRoutesList.size,
-            tunRoutesList.size
-        )
-    }
+    val tunRoutesPreview = pluralStringResource(
+        R.plurals.tun_routes_preview,
+        tunRoutesList.size,
+        tunRoutesList.size
+    )
     val hevSocks5TunnelConfigPreview = settingsState.hevSocks5TunnelConfig.value
         .lineSequence()
         .firstOrNull { it.isNotBlank() }
