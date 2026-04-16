@@ -318,7 +318,6 @@ class Preferences(context: Context) {
         val DEFAULT_HEV_SOCKS5_TUNNEL_CONFIG: String = """
             tunnel:
               mtu: 65535
-              multi-queue: true
             socks5:
               port: 10809
               address: '::1'

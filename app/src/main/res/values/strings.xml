@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name" translatable="false">SimpleXray</string>
     <string name="source_url" translatable="false">https://github.com/HeXis-YS/SimpleXray</string>
-    <string name="geoip_url" translatable="false">https://ghfast.top/https://github.com/HeXis-YS/xray-geodata-cut/releases/download/rolling/geoip-client.dat</string>
-    <string name="geosite_url" translatable="false">https://ghfast.top/https://github.com/HeXis-YS/xray-geodata-cut/releases/download/rolling/geosite-client.dat</string>
+    <string name="geoip_url" translatable="false">https://ghfast.top/https://github.com/HeXis-YS/xray-geodata-cut/releases/download/rolling/geoip.dat</string>
+    <string name="geosite_url" translatable="false">https://ghfast.top/https://github.com/HeXis-YS/xray-geodata-cut/releases/download/rolling/geosite.dat</string>
     <string name="connectivity_test_url" translatable="false">http://www.gstatic.com/generate_204</string>
     <string name="ipv6" translatable="false">IPv6</string>
     <string name="apps_title">App-based Proxy</string>
